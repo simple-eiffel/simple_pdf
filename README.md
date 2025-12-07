@@ -117,9 +117,42 @@ end
 | `with_wkhtmltopdf` | Switch to wkhtmltopdf engine |
 | `with_chrome` | Switch to Chrome engine |
 
+### Fluent API Examples
+
+**Basic report with Letter size, landscape:**
+```eiffel
+create pdf.make
+doc := pdf.page ("Letter").landscape.from_html (report_html)
+doc.save_to_file ("report.pdf")
+```
+
+**Website capture with custom margins:**
+```eiffel
+create pdf.make
+doc := pdf.page ("A4").portrait.margin_all ("15mm").from_url ("https://example.com")
+```
+
+**Using Chrome for complex CSS:**
+```eiffel
+create pdf.make
+doc := pdf.with_chrome.page ("Letter").margins ("1in", "1in", "0.75in", "0.75in").from_html (styled_html)
+```
+
+**Document with different top/bottom margins:**
+```eiffel
+create pdf.make
+doc := pdf.page ("A4").margin_top ("30mm").margin_bottom ("20mm").margin_left ("25mm").margin_right ("25mm").from_file ("template.html")
+```
+
+**Quick A4 portrait (defaults):**
+```eiffel
+create pdf.make
+doc := pdf.from_html ("<h1>Simple PDF</h1>")  -- Uses A4 portrait by default
+```
+
 ### Comparison
 
-**Traditional:**
+**Traditional (5 lines):**
 ```eiffel
 create pdf.make
 pdf.set_page_size ("Letter")
@@ -129,7 +162,7 @@ pdf.set_margin_bottom ("25mm")
 doc := pdf.from_url ("https://example.com")
 ```
 
-**Fluent:**
+**Fluent (2 lines):**
 ```eiffel
 create pdf.make
 doc := pdf.page ("Letter").landscape.margins ("25mm", "25mm", "20mm", "20mm").from_url ("https://example.com")

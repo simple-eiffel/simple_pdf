@@ -131,6 +131,29 @@ doc.save_to_file ("website.pdf")</code></pre>
                 <tr><td><code>with_chrome</code></td><td>Switch to Chrome engine</td></tr>
             </table>
 
+            <h3>Fluent API Examples</h3>
+
+            <p><strong>Basic report with Letter size, landscape:</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.page ("Letter").landscape.from_html (report_html)
+doc.save_to_file ("report.pdf")</code></pre>
+
+            <p><strong>Website capture with custom margins:</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.page ("A4").portrait.margin_all ("15mm").from_url ("https://example.com")</code></pre>
+
+            <p><strong>Using Chrome for complex CSS:</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.with_chrome.page ("Letter").margins ("1in", "1in", "0.75in", "0.75in").from_html (styled_html)</code></pre>
+
+            <p><strong>Document with different top/bottom margins:</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.page ("A4").margin_top ("30mm").margin_bottom ("20mm").margin_left ("25mm").margin_right ("25mm").from_file ("template.html")</code></pre>
+
+            <p><strong>Quick A4 portrait (defaults):</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.from_html ("&lt;h1&gt;Simple PDF&lt;/h1&gt;")  -- Uses A4 portrait by default</code></pre>
+
             <h3>Comparison</h3>
             <p><strong>Traditional (5 lines):</strong></p>
             <pre><code>create pdf.make
@@ -143,10 +166,6 @@ doc := pdf.from_html (report_html)</code></pre>
             <p><strong>Fluent (2 lines):</strong></p>
             <pre><code>create pdf.make
 doc := pdf.page ("Letter").landscape.margins ("25mm", "25mm", "20mm", "20mm").from_html (report_html)</code></pre>
-
-            <h3>Chrome with Fluent API</h3>
-            <pre><code>create pdf.make
-doc := pdf.with_chrome.page ("A4").portrait.margin_all ("10mm").from_url ("https://example.com")</code></pre>
         </section>
 
         <section id="features">
