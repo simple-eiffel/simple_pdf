@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_pdf - PDF Generation for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_pdf</h1>
+        <p class="tagline">PDF Generation with Multi-Engine Support for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-rfc">Service Layer</span>
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#api">API Reference</a></li>
+            <li><a href="https://github.com/ljr1981/simple_pdf">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_pdf</strong> provides HTML-to-PDF conversion for Eiffel applications
+                using multiple rendering engines. Convert HTML strings, files, or URLs to PDF with
+                full control over page size, orientation, and margins.
+            </p>
+            <p>
+                All Windows binaries are bundled - no separate installation required. Choose between
+                wkhtmltopdf (default, bundled) or Chrome/Edge (best CSS support) for rendering.
+            </p>
+        </section>
+
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+            <h3>Installation</h3>
+            <pre><code>&lt;library name="simple_pdf" location="$SIMPLE_PDF\simple_pdf.ecf"/&gt;</code></pre>
+
+            <h3>Basic Usage</h3>
+            <pre><code>local
+    pdf: SIMPLE_PDF
+    doc: SIMPLE_PDF_DOCUMENT
+do
+    create pdf.make
+    doc := pdf.from_html ("&lt;h1&gt;Hello World&lt;/h1&gt;")
+    doc.save_to_file ("output.pdf")
+end</code></pre>
+
+            <h3>With Page Settings</h3>
+            <pre><code>create pdf.make
+pdf.set_page_size ("Letter")
+pdf.set_orientation ("Landscape")
+pdf.set_margins ("1in")
+
+doc := pdf.from_url ("https://example.com")
+doc.save_to_file ("website.pdf")</code></pre>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Multi-Engine</h4>
+                    <p>wkhtmltopdf (bundled) or Chrome/Edge headless</p>
+                </div>
+                <div class="feature-card">
+                    <h4>HTML to PDF</h4>
+                    <p>Convert strings, files, or URLs to PDF</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Text Extraction</h4>
+                    <p>Extract text from existing PDFs via pdftotext</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Bundled Binaries</h4>
+                    <p>No external installation required on Windows</p>
+                </div>
+            </div>
+
+            <h3>Using Chrome for Best CSS</h3>
+            <pre><code>-- Chrome/Edge provides best CSS rendering
+create pdf.make_with_engine (create {SIMPLE_PDF_CHROME})
+doc := pdf.from_html (complex_css_html)
+doc.save_to_file ("styled.pdf")</code></pre>
+
+            <h3>Text Extraction</h3>
+            <pre><code>local
+    reader: SIMPLE_PDF_READER
+    text: STRING
+do
+    create reader.make
+    if reader.is_available then
+        text := reader.extract_text ("document.pdf")
+        -- Or specific pages
+        text := reader.extract_pages ("document.pdf", 1, 5)
+    end
+end</code></pre>
+
+            <h3>Engine Availability Check</h3>
+            <pre><code>local
+    engines: SIMPLE_PDF_ENGINES
+do
+    create engines
+    print (engines.report)
+    -- Shows which engines are available
+end</code></pre>
+        </section>
+
+        <section id="api">
+            <h2>API Reference</h2>
+
+            <h3>SIMPLE_PDF (Main API)</h3>
+            <div class="api-section">
+                <h3>make</h3>
+                <div class="signature">create pdf.make</div>
+                <p>Create PDF generator with default wkhtmltopdf engine.</p>
+                <div class="contracts">
+                    <h4>Ensure</h4>
+                    <div class="ensure">engine_attached: engine /= Void</div>
+                    <div class="ensure">default_page_size: page_size.same_string ("A4")</div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h3>make_with_engine (a_engine: SIMPLE_PDF_ENGINE)</h3>
+                <div class="signature">create pdf.make_with_engine (create {SIMPLE_PDF_CHROME})</div>
+                <p>Create PDF generator with specified rendering engine.</p>
+                <div class="contracts">
+                    <h4>Require</h4>
+                    <div class="require">engine_attached: a_engine /= Void</div>
+                </div>
+            </div>
+
+            <h3>Conversion Features</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>from_html (html)</code></td><td>Convert HTML string to PDF</td></tr>
+                <tr><td><code>from_file (path)</code></td><td>Convert HTML file to PDF</td></tr>
+                <tr><td><code>from_url (url)</code></td><td>Convert URL to PDF</td></tr>
+            </table>
+
+            <h3>Page Settings</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>set_page_size (size)</code></td><td>A4, Letter, Legal, etc.</td></tr>
+                <tr><td><code>set_orientation (orient)</code></td><td>Portrait or Landscape</td></tr>
+                <tr><td><code>set_margins (margin)</code></td><td>Set all margins (e.g., "10mm")</td></tr>
+                <tr><td><code>set_margin_top/bottom/left/right</code></td><td>Individual margins</td></tr>
+            </table>
+
+            <h3>Engine Management</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>is_available</code></td><td>Check if engine is ready</td></tr>
+                <tr><td><code>use_wkhtmltopdf</code></td><td>Switch to wkhtmltopdf engine</td></tr>
+                <tr><td><code>use_chrome</code></td><td>Switch to Chrome/Edge engine</td></tr>
+            </table>
+
+            <h3>SIMPLE_PDF_DOCUMENT (Result Object)</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>is_valid</code></td><td>True if PDF was generated successfully</td></tr>
+                <tr><td><code>error_message</code></td><td>Error details if generation failed</td></tr>
+                <tr><td><code>save_to_file (path)</code></td><td>Save PDF to file</td></tr>
+                <tr><td><code>content</code></td><td>Raw PDF bytes</td></tr>
+                <tr><td><code>as_base64</code></td><td>PDF as base64 string</td></tr>
+            </table>
+
+            <h3>SIMPLE_PDF_READER (Text Extraction)</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>extract_text (path)</code></td><td>Extract all text from PDF</td></tr>
+                <tr><td><code>extract_page (path, page)</code></td><td>Extract text from single page</td></tr>
+                <tr><td><code>extract_pages (path, first, last)</code></td><td>Extract text from page range</td></tr>
+                <tr><td><code>extract_text_raw (path)</code></td><td>Extract without layout</td></tr>
+            </table>
+        </section>
+
+        <section id="architecture">
+            <h2>Architecture</h2>
+            <pre><code>SIMPLE_PDF_ENGINE (deferred)
+    |-- SIMPLE_PDF_WKHTMLTOPDF (default, bundled)
+    |-- SIMPLE_PDF_CHROME (Chrome/Edge headless)
+
+SIMPLE_PDF (main API - delegates to engine)
+SIMPLE_PDF_DOCUMENT (result object)
+SIMPLE_PDF_READER (text extraction via pdftotext)
+SIMPLE_PDF_ENGINES (availability reporter)</code></pre>
+
+            <h3>Bundled Binaries</h3>
+            <table>
+                <tr><th>Binary</th><th>Size</th><th>Purpose</th></tr>
+                <tr><td>wkhtmltopdf.exe</td><td>~40MB</td><td>PDF generation</td></tr>
+                <tr><td>wkhtmltox.dll</td><td>~80MB</td><td>wkhtmltopdf library</td></tr>
+                <tr><td>pdftotext.exe</td><td>~1MB</td><td>Text extraction</td></tr>
+                <tr><td>Poppler DLLs</td><td>~22MB</td><td>pdftotext dependencies</td></tr>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/ljr1981">simple_*</a> library collection</p>
+        <p>Depends on:
+            <a href="https://ljr1981.github.io/simple_json/">simple_json</a> |
+            <a href="https://ljr1981.github.io/simple_uuid/">simple_uuid</a> |
+            <a href="https://ljr1981.github.io/simple_base64/">simple_base64</a>
+        </p>
+        <p class="copyright">MIT License - Copyright (c) 2024-2025, Larry Rix</p>
+    </footer>
+</body>
+</html>

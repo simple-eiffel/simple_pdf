@@ -86,6 +86,7 @@ feature -- Manual Tests
 			if l_engines.any_available then
 				test_html_to_pdf
 				test_url_to_pdf
+				test_us_constitution
 			else
 				print ("WARNING: No PDF engine available. Skipping generation tests.%N")
 			end
@@ -220,7 +221,205 @@ feature -- Manual Tests
 			end
 		end
 
+	test_us_constitution
+			-- Test creating a US Constitution PDF (kept for viewing)
+		local
+			l_pdf: SIMPLE_PDF
+			l_doc: SIMPLE_PDF_DOCUMENT
+			l_html: STRING
+			l_output: STRING
+		do
+			print ("Test: US Constitution PDF%N")
+
+			create l_pdf.make
+			if l_pdf.is_available then
+				l_output := get_output_dir + "/us_constitution.pdf"
+
+				l_pdf.set_page_size ("Letter")
+				l_pdf.set_margin_top ("25mm")
+				l_pdf.set_margin_bottom ("25mm")
+				l_pdf.set_margin_left ("20mm")
+				l_pdf.set_margin_right ("20mm")
+
+				l_html := us_constitution_html
+
+				l_doc := l_pdf.from_html (l_html)
+				if l_doc.is_valid then
+					if l_doc.save_to_file (l_output) then
+						print ("  SUCCESS: US Constitution PDF saved to:%N")
+						print ("           " + l_output + "%N")
+						print ("           (File kept for viewing)%N")
+						passed := passed + 1
+					else
+						print ("  FAILED: Could not save PDF%N")
+						failed := failed + 1
+					end
+				else
+					if attached l_doc.error_message as l_err then
+						print ("  FAILED: " + l_err + "%N")
+					else
+						print ("  FAILED: Unknown error%N")
+					end
+					failed := failed + 1
+				end
+			else
+				print ("  SKIPPED: Engine not available%N")
+			end
+		end
+
+	us_constitution_html: STRING
+			-- HTML content for US Constitution
+		do
+			Result := "[
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>The Constitution of the United States</title>
+	<style>
+		body {
+			font-family: 'Georgia', 'Times New Roman', serif;
+			line-height: 1.6;
+			max-width: 7in;
+			margin: 0 auto;
+			padding: 20px;
+			color: #333;
+		}
+		h1 {
+			text-align: center;
+			font-size: 24pt;
+			margin-bottom: 5px;
+			color: #1a1a1a;
+		}
+		h2 {
+			text-align: center;
+			font-size: 14pt;
+			font-weight: normal;
+			font-style: italic;
+			margin-top: 0;
+			margin-bottom: 30px;
+			color: #666;
+		}
+		h3 {
+			font-size: 14pt;
+			margin-top: 25px;
+			margin-bottom: 10px;
+			color: #1a1a1a;
+		}
+		h4 {
+			font-size: 12pt;
+			margin-top: 15px;
+			margin-bottom: 8px;
+			color: #333;
+		}
+		.preamble {
+			font-size: 13pt;
+			font-style: italic;
+			text-align: justify;
+			margin: 20px 0 30px 0;
+			padding: 15px;
+			background: #f9f9f9;
+			border-left: 3px solid #1a1a1a;
+		}
+		.article {
+			margin-bottom: 20px;
+		}
+		.section {
+			text-align: justify;
+			margin-bottom: 12px;
+		}
+		.section-num {
+			font-weight: bold;
+		}
+		.footer {
+			margin-top: 40px;
+			text-align: center;
+			font-size: 10pt;
+			color: #666;
+			border-top: 1px solid #ccc;
+			padding-top: 15px;
+		}
+	</style>
+</head>
+<body>
+	<h1>The Constitution</h1>
+	<h2>of the United States of America</h2>
+
+	<div class="preamble">
+		We the People of the United States, in Order to form a more perfect Union,
+		establish Justice, insure domestic Tranquility, provide for the common defence,
+		promote the general Welfare, and secure the Blessings of Liberty to ourselves
+		and our Posterity, do ordain and establish this Constitution for the United
+		States of America.
+	</div>
+
+	<div class="article">
+		<h3>Article I - The Legislative Branch</h3>
+
+		<h4>Section 1</h4>
+		<p class="section">All legislative Powers herein granted shall be vested in a Congress of the United States, which shall consist of a Senate and House of Representatives.</p>
+
+		<h4>Section 2</h4>
+		<p class="section">The House of Representatives shall be composed of Members chosen every second Year by the People of the several States, and the Electors in each State shall have the Qualifications requisite for Electors of the most numerous Branch of the State Legislature.</p>
+		<p class="section">No Person shall be a Representative who shall not have attained to the Age of twenty five Years, and been seven Years a Citizen of the United States, and who shall not, when elected, be an Inhabitant of that State in which he shall be chosen.</p>
+		<p class="section">Representatives and direct Taxes shall be apportioned among the several States which may be included within this Union, according to their respective Numbers, which shall be determined by adding to the whole Number of free Persons, including those bound to Service for a Term of Years, and excluding Indians not taxed, three fifths of all other Persons.</p>
+
+		<h4>Section 3</h4>
+		<p class="section">The Senate of the United States shall be composed of two Senators from each State, chosen by the Legislature thereof, for six Years; and each Senator shall have one Vote.</p>
+		<p class="section">No Person shall be a Senator who shall not have attained to the Age of thirty Years, and been nine Years a Citizen of the United States, and who shall not, when elected, be an Inhabitant of that State for which he shall be chosen.</p>
+		<p class="section">The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.</p>
+	</div>
+
+	<div class="article">
+		<h3>Article II - The Executive Branch</h3>
+
+		<h4>Section 1</h4>
+		<p class="section">The executive Power shall be vested in a President of the United States of America. He shall hold his Office during the Term of four Years, and, together with the Vice President, chosen for the same Term, be elected, as follows:</p>
+		<p class="section">Each State shall appoint, in such Manner as the Legislature thereof may direct, a Number of Electors, equal to the whole Number of Senators and Representatives to which the State may be entitled in the Congress: but no Senator or Representative, or Person holding an Office of Trust or Profit under the United States, shall be appointed an Elector.</p>
+
+		<h4>Section 2</h4>
+		<p class="section">The President shall be Commander in Chief of the Army and Navy of the United States, and of the Militia of the several States, when called into the actual Service of the United States; he may require the Opinion, in writing, of the principal Officer in each of the executive Departments, upon any Subject relating to the Duties of their respective Offices, and he shall have Power to grant Reprieves and Pardons for Offences against the United States, except in Cases of Impeachment.</p>
+	</div>
+
+	<div class="article">
+		<h3>Article III - The Judicial Branch</h3>
+
+		<h4>Section 1</h4>
+		<p class="section">The judicial Power of the United States, shall be vested in one supreme Court, and in such inferior Courts as the Congress may from time to time ordain and establish. The Judges, both of the supreme and inferior Courts, shall hold their Offices during good Behaviour, and shall, at stated Times, receive for their Services, a Compensation, which shall not be diminished during their Continuance in Office.</p>
+
+		<h4>Section 2</h4>
+		<p class="section">The judicial Power shall extend to all Cases, in Law and Equity, arising under this Constitution, the Laws of the United States, and Treaties made, or which shall be made, under their Authority; to all Cases affecting Ambassadors, other public Ministers and Consuls; to all Cases of admiralty and maritime Jurisdiction; to Controversies to which the United States shall be a Party; to Controversies between two or more States; between a State and Citizens of another State; between Citizens of different States; between Citizens of the same State claiming Lands under Grants of different States, and between a State, or the Citizens thereof, and foreign States, Citizens or Subjects.</p>
+	</div>
+
+	<div class="footer">
+		<p>Generated by simple_pdf library</p>
+		<p>]" + (create {DATE_TIME}.make_now).out + "[</p>
+	</div>
+</body>
+</html>
+			]"
+		end
+
 feature {NONE} -- Helpers
+
+	get_output_dir: STRING
+			-- Get output directory for persistent test files
+		local
+			l_env: EXECUTION_ENVIRONMENT
+			l_dir: DIRECTORY
+		do
+			create l_env
+			if attached l_env.item ("SIMPLE_PDF") as l_path then
+				Result := l_path.to_string_8 + "/tests/outputs"
+			else
+				Result := "tests/outputs"
+			end
+			-- Ensure directory exists
+			create l_dir.make (Result)
+			if not l_dir.exists then
+				l_dir.create_dir
+			end
+		end
 
 	get_temp_dir: STRING
 			-- Get system temp directory
