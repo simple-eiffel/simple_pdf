@@ -26,6 +26,7 @@
             <li><a href="#overview">Overview</a></li>
             <li><a href="#api-integration">API Integration</a></li>
             <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#fluent-api">Fluent API</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#api">API Reference</a></li>
             <li><a href="https://github.com/ljr1981/simple_pdf">GitHub</a></li>
@@ -97,7 +98,7 @@ do
     doc.save_to_file ("output.pdf")
 end</code></pre>
 
-            <h3>With Page Settings</h3>
+            <h3>With Page Settings (Traditional)</h3>
             <pre><code>create pdf.make
 pdf.set_page_size ("Letter")
 pdf.set_orientation ("Landscape")
@@ -105,6 +106,47 @@ pdf.set_margins ("1in")
 
 doc := pdf.from_url ("https://example.com")
 doc.save_to_file ("website.pdf")</code></pre>
+
+            <h3>Fluent API</h3>
+            <p>Chain configuration calls for concise, readable code:</p>
+            <pre><code>create pdf.make
+doc := pdf.page ("Letter").landscape.margin_all ("1in").from_url ("https://example.com")
+doc.save_to_file ("website.pdf")</code></pre>
+        </section>
+
+        <section id="fluent-api">
+            <h2>Fluent API</h2>
+            <p>The fluent API allows chaining configuration calls in a single expression:</p>
+
+            <h3>Fluent Features</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>page (size)</code></td><td>Set page size (A4, Letter, Legal)</td></tr>
+                <tr><td><code>portrait</code></td><td>Set portrait orientation</td></tr>
+                <tr><td><code>landscape</code></td><td>Set landscape orientation</td></tr>
+                <tr><td><code>margin_all (margin)</code></td><td>Set all margins to same value</td></tr>
+                <tr><td><code>margin_top/bottom/left/right</code></td><td>Set individual margins</td></tr>
+                <tr><td><code>margins (top, bottom, left, right)</code></td><td>Set all four margins</td></tr>
+                <tr><td><code>with_wkhtmltopdf</code></td><td>Switch to wkhtmltopdf engine</td></tr>
+                <tr><td><code>with_chrome</code></td><td>Switch to Chrome engine</td></tr>
+            </table>
+
+            <h3>Comparison</h3>
+            <p><strong>Traditional (5 lines):</strong></p>
+            <pre><code>create pdf.make
+pdf.set_page_size ("Letter")
+pdf.set_orientation ("Landscape")
+pdf.set_margin_top ("25mm")
+pdf.set_margin_bottom ("25mm")
+doc := pdf.from_html (report_html)</code></pre>
+
+            <p><strong>Fluent (2 lines):</strong></p>
+            <pre><code>create pdf.make
+doc := pdf.page ("Letter").landscape.margins ("25mm", "25mm", "20mm", "20mm").from_html (report_html)</code></pre>
+
+            <h3>Chrome with Fluent API</h3>
+            <pre><code>create pdf.make
+doc := pdf.with_chrome.page ("A4").portrait.margin_all ("10mm").from_url ("https://example.com")</code></pre>
         </section>
 
         <section id="features">

@@ -21,6 +21,10 @@ note
 			pdf.set_orientation ("Landscape")
 			pdf.set_margins ("1in")
 			doc := pdf.from_html (report_html)
+
+		Fluent API:
+			create pdf.make
+			doc := pdf.page ("Letter").landscape.margin_all ("1in").from_html (report_html)
 	]"
 	author: "Your Organization"
 	date: "$Date$"
@@ -171,6 +175,90 @@ feature -- Engine switching
 			-- Switch to Chrome engine
 		do
 			create {SIMPLE_PDF_CHROME} engine.make
+		end
+
+feature -- Fluent API
+
+	page (a_size: STRING): like Current
+			-- Set page size and return self for chaining
+		require
+			size_not_empty: not a_size.is_empty
+		do
+			set_page_size (a_size)
+			Result := Current
+		end
+
+	portrait: like Current
+			-- Set portrait orientation and return self for chaining
+		do
+			set_orientation ("Portrait")
+			Result := Current
+		end
+
+	landscape: like Current
+			-- Set landscape orientation and return self for chaining
+		do
+			set_orientation ("Landscape")
+			Result := Current
+		end
+
+	margin_all (a_margin: STRING): like Current
+			-- Set all margins and return self for chaining
+		do
+			set_margins (a_margin)
+			Result := Current
+		end
+
+	margin_top (a_margin: STRING): like Current
+			-- Set top margin and return self for chaining
+		do
+			set_margin_top (a_margin)
+			Result := Current
+		end
+
+	margin_bottom (a_margin: STRING): like Current
+			-- Set bottom margin and return self for chaining
+		do
+			set_margin_bottom (a_margin)
+			Result := Current
+		end
+
+	margin_left (a_margin: STRING): like Current
+			-- Set left margin and return self for chaining
+		do
+			set_margin_left (a_margin)
+			Result := Current
+		end
+
+	margin_right (a_margin: STRING): like Current
+			-- Set right margin and return self for chaining
+		do
+			set_margin_right (a_margin)
+			Result := Current
+		end
+
+	margins (a_top, a_bottom, a_left, a_right: STRING): like Current
+			-- Set individual margins and return self for chaining
+		do
+			set_margin_top (a_top)
+			set_margin_bottom (a_bottom)
+			set_margin_left (a_left)
+			set_margin_right (a_right)
+			Result := Current
+		end
+
+	with_wkhtmltopdf: like Current
+			-- Switch to wkhtmltopdf engine and return self for chaining
+		do
+			use_wkhtmltopdf
+			Result := Current
+		end
+
+	with_chrome: like Current
+			-- Switch to Chrome engine and return self for chaining
+		do
+			use_chrome
+			Result := Current
 		end
 
 end

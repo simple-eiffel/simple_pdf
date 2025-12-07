@@ -89,6 +89,52 @@ do
 end
 ```
 
+## Fluent API
+
+`simple_pdf` supports a fluent API for concise, chainable configuration:
+
+```eiffel
+local
+    pdf: SIMPLE_PDF
+    doc: SIMPLE_PDF_DOCUMENT
+do
+    create pdf.make
+    doc := pdf.page ("Letter").landscape.margin_all ("1in").from_html (report_html)
+    doc.save_to_file ("report.pdf")
+end
+```
+
+### Fluent API Reference
+
+| Feature | Description |
+|---------|-------------|
+| `page (size)` | Set page size (A4, Letter, Legal) |
+| `portrait` | Set portrait orientation |
+| `landscape` | Set landscape orientation |
+| `margin_all (margin)` | Set all margins |
+| `margin_top/bottom/left/right (margin)` | Set individual margins |
+| `margins (top, bottom, left, right)` | Set all four margins at once |
+| `with_wkhtmltopdf` | Switch to wkhtmltopdf engine |
+| `with_chrome` | Switch to Chrome engine |
+
+### Comparison
+
+**Traditional:**
+```eiffel
+create pdf.make
+pdf.set_page_size ("Letter")
+pdf.set_orientation ("Landscape")
+pdf.set_margin_top ("25mm")
+pdf.set_margin_bottom ("25mm")
+doc := pdf.from_url ("https://example.com")
+```
+
+**Fluent:**
+```eiffel
+create pdf.make
+doc := pdf.page ("Letter").landscape.margins ("25mm", "25mm", "20mm", "20mm").from_url ("https://example.com")
+```
+
 ## Converting HTML to PDF
 
 ```eiffel
