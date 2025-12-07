@@ -1,0 +1,21 @@
+# Eiffel compilation artifacts
+EIFGENs/
+*.lock
+
+# Output directory
+output/
+
+# Log files (may contain PII from contact form)
+*.log
+ssc_server.log
+
+# Database files
+*.db
+
+# Sensitive config (use environment variables instead)
+config.production.json
+
+# Local deployment notes (contains IPs, credentials info)
+*.local.txt
+DEPLOYMENT_NOTES.local.txt
+*.rc

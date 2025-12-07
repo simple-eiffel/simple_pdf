@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-23-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-23-0 http://www.eiffel.com/developers/xml/configuration-1-23-0.xsd" name="simple_pdf" uuid="A1B2C3D4-5678-90AB-CDEF-123456789ABC" library_target="simple_pdf">
+	<description>Simple PDF generation and text extraction library</description>
+	<target name="simple_pdf">
+		<root all_classes="true"/>
+		<file_rule>
+			<exclude>/EIFGENs$</exclude>
+			<exclude>/\..*$</exclude>
+		</file_rule>
+		<option warning="warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="thread" use="thread"/>
+		</capability>
+		<variable name="SIMPLE_PDF" value="D:\prod\simple_pdf"/>
+		<!-- Core libraries -->
+		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+		<library name="encoding" location="$ISE_LIBRARY\library\encoding\encoding.ecf"/>
+		<library name="process" location="$ISE_LIBRARY\library\process\process.ecf"/>
+		<library name="uuid" location="$ISE_LIBRARY\library\uuid\uuid.ecf"/>
+		<!-- simple_* dependencies -->
+		<library name="simple_base64" location="$SIMPLE_BASE64\simple_base64.ecf"/>
+		<!-- Source clusters -->
+		<cluster name="core" location=".\src\core\" recursive="true"/>
+		<cluster name="engines" location=".\src\engines\" recursive="true"/>
+	</target>
+	<target name="simple_pdf_tests" extends="simple_pdf">
+		<root class="SIMPLE_PDF_TEST_APP" feature="make"/>
+		<option warning="warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="total_order_on_reals" value="true"/>
+		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<cluster name="tests" location=".\tests\" recursive="true"/>
+	</target>
+</system>
