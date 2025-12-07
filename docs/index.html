@@ -59,23 +59,18 @@ APP_API (full application stack)</code></pre>
             <h3>Using via SERVICE_API or APP_API</h3>
             <p>If your project uses <code>simple_service_api</code> or <code>simple_app_api</code>,
                you automatically have access to <code>simple_pdf</code> - no additional ECF entry needed:</p>
-            <pre><code>class MY_WEB_SERVICE
-
-inherit
-    SERVICE_API  -- or APP_API
-
-feature
-    generate_report
-        local
-            pdf: SIMPLE_PDF
-            doc: SIMPLE_PDF_DOCUMENT
-        do
-            create pdf.make
-            doc := pdf.from_html (build_report_html)
-            if doc.is_valid then
-                doc.save_to_file ("report.pdf")
-            end
-        end
+            <pre><code>local
+    api: SERVICE_API
+    doc: SIMPLE_PDF_DOCUMENT
+do
+    create api.make
+    -- Using convenience method
+    doc := api.html_to_pdf (build_report_html)
+    -- Or get the PDF generator for more control
+    doc := api.new_pdf.page ("Letter").landscape.from_html (report_html)
+    if doc.is_valid then
+        doc.save_to_file ("report.pdf")
+    end
 end</code></pre>
 
             <h3>Standalone Installation</h3>
@@ -228,7 +223,6 @@ end</code></pre>
                 <p>Create PDF generator with default wkhtmltopdf engine.</p>
                 <div class="contracts">
                     <h4>Ensure</h4>
-                    <div class="ensure">engine_attached: engine /= Void</div>
                     <div class="ensure">default_page_size: page_size.same_string ("A4")</div>
                 </div>
             </div>
@@ -237,10 +231,7 @@ end</code></pre>
                 <h3>make_with_engine (a_engine: SIMPLE_PDF_ENGINE)</h3>
                 <div class="signature">create pdf.make_with_engine (create {SIMPLE_PDF_CHROME})</div>
                 <p>Create PDF generator with specified rendering engine.</p>
-                <div class="contracts">
-                    <h4>Require</h4>
-                    <div class="require">engine_attached: a_engine /= Void</div>
-                </div>
+                
             </div>
 
             <h3>Conversion Features</h3>

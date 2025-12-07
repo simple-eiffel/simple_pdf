@@ -32,8 +32,6 @@ feature -- Conversion
 			engine_available: is_available
 			html_not_empty: not a_html.is_empty
 		deferred
-		ensure
-			result_attached: Result /= Void
 		end
 
 	render_file (a_path: STRING): SIMPLE_PDF_DOCUMENT
@@ -43,8 +41,6 @@ feature -- Conversion
 			path_not_empty: not a_path.is_empty
 			file_exists: (create {RAW_FILE}.make_with_name (a_path)).exists
 		deferred
-		ensure
-			result_attached: Result /= Void
 		end
 
 	render_url (a_url: STRING): SIMPLE_PDF_DOCUMENT
@@ -53,8 +49,6 @@ feature -- Conversion
 			engine_available: is_available
 			url_not_empty: not a_url.is_empty
 		deferred
-		ensure
-			result_attached: Result /= Void
 		end
 
 feature -- Settings

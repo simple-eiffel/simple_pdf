@@ -50,8 +50,6 @@ feature {NONE} -- Initialization
 
 	make_with_engine (a_engine: SIMPLE_PDF_ENGINE)
 			-- Create with specified rendering engine
-		require
-			engine_attached: a_engine /= Void
 		do
 			engine := a_engine
 		ensure

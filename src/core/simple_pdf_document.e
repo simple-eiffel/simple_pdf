@@ -17,7 +17,6 @@ feature {NONE} -- Initialization
 	make (a_content: MANAGED_POINTER; a_size: INTEGER)
 			-- Create document from binary content
 		require
-			content_attached: a_content /= Void
 			size_positive: a_size > 0
 		do
 			content := a_content
