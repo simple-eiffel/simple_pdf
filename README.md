@@ -4,7 +4,7 @@
 
 # simple_pdf
 
-**[Documentation](https://ljr1981.github.io/simple_pdf/)** | **[GitHub](https://github.com/ljr1981/simple_pdf)**
+**[Documentation](https://simple-eiffel.github.io/simple_pdf/)** | **[GitHub](https://github.com/simple-eiffel/simple_pdf)**
 
 PDF generation library for Eiffel with multi-engine support. Convert HTML, files, or URLs to PDF with bundled executables.
 
@@ -71,9 +71,9 @@ For projects that only need PDF functionality:
 
 | Library | Purpose | Environment Variable |
 |---------|---------|---------------------|
-| [simple_json](https://github.com/ljr1981/simple_json) | JSON support | `$SIMPLE_JSON` |
-| [simple_uuid](https://github.com/ljr1981/simple_uuid) | Temp file naming | `$SIMPLE_UUID` |
-| [simple_base64](https://github.com/ljr1981/simple_base64) | Base64 encoding | `$SIMPLE_BASE64` |
+| [simple_json](https://github.com/simple-eiffel/simple_json) | JSON support | `$SIMPLE_JSON` |
+| [simple_uuid](https://github.com/simple-eiffel/simple_uuid) | Temp file naming | `$SIMPLE_UUID` |
+| [simple_base64](https://github.com/simple-eiffel/simple_base64) | Base64 encoding | `$SIMPLE_BASE64` |
 
 ## Quick Start
 
