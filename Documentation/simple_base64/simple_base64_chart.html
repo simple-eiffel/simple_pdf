@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="TTSimple Base64 - Encoding and decoding for Base64 and Base64URL.  TTProvides RFC 4648 compliant Base64 encoding and decoding with support for TTboth standard Base64 and URL-safe Base64URL variants.  TTFeatures: TT- Encode strings to Base64 TT- Decode Base64 to strings TT- URL-safe Base64URL encoding (for JWT, URLs, filenames) TT- Optional padding control  TTUsage: TTTcreate encoder.make TTTencoded := encoder.encode (Hello, World!) TTTdecoded := encoder.decode (encoded)  TTT-- URL-safe variant TTTurl_safe := encoder.encode_url (data+with/special=chars)"/>
+<meta name="author" content="Larry Rix"/>
+<meta name="eis" content="name=Documentation, src=../docs/index.html, protocol=URI, tag=documentation"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2024-2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>simple_base64 Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_base64_links.html">Relations</a>
+<a class="nav class" href="simple_base64_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_base64"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../simple_base64/simple_base64_chart.html">SIMPLE_BASE64</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <span class="necluster">src</span>
+	<span class="eitag">description</span><span class="esymbol">:</span> 
+		<span class="estring">&quot;Simple Base64 - Encoding and decoding for Base64 and Base64URL.</span>
+		
+		<span class="estring">Provides RFC 4648 compliant Base64 encoding and decoding with support for</span>
+		<span class="estring">both standard Base64 and URL-safe Base64URL variants.</span>
+		
+		<span class="estring">Features:</span>
+		<span class="estring">- Encode strings to Base64</span>
+		<span class="estring">- Decode Base64 to strings</span>
+		<span class="estring">- URL-safe Base64URL encoding (for JWT, URLs, filenames)</span>
+		<span class="estring">- Optional padding control</span>
+		
+		<span class="estring">Usage:</span>
+		<span class="estring">create encoder.make</span>
+		<span class="estring">encoded := encoder.encode (%&quot;Hello, World!%&quot;)</span>
+		<span class="estring">decoded := encoder.decode (encoded)</span>
+		
+		<span class="estring">-- URL-safe variant</span>
+		<span class="estring">url_safe := encoder.encode_url (%&quot;data+with/special=chars%&quot;)&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../simple_base64/simple_base64_short.html#f_make">make</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../base/any_chart.html">ANY</a>
+
+<span class="ekeyword">Queries</span>
+	<span title="`data_uri_mediatype' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_data_uri_mediatype">data_uri_mediatype</a> <span class="esymbol">(</span><span class="elocal">a_uri</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`data_uri_prefix' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_data_uri_prefix">Data_uri_prefix</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`decode' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_decode">decode</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`decode_bytes' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_decode_bytes">decode_bytes</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span></span>
+	<span title="`decode_bytes_lenient' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_decode_bytes_lenient">decode_bytes_lenient</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span></span>
+	<span title="`decode_lenient' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_decode_lenient">decode_lenient</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`decode_url' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_decode_url">decode_url</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode">encode</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode_bytes' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode_bytes">encode_bytes</a> <span class="esymbol">(</span><span class="elocal">a_bytes</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode_bytes_mime' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode_bytes_mime">encode_bytes_mime</a> <span class="esymbol">(</span><span class="elocal">a_bytes</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode_mime' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode_mime">encode_mime</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode_url' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode_url">encode_url</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`encode_url_with_padding' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_encode_url_with_padding">encode_url_with_padding</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`from_data_uri' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_from_data_uri">from_data_uri</a> <span class="esymbol">(</span><span class="elocal">a_uri</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`from_data_uri_bytes' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_from_data_uri_bytes">from_data_uri_bytes</a> <span class="esymbol">(</span><span class="elocal">a_uri</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span></span>
+	<span title="`is_base64_data_uri' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_is_base64_data_uri">is_base64_data_uri</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_data_uri' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_is_data_uri">is_data_uri</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_valid_base64' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_is_valid_base64">is_valid_base64</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_valid_base64_url' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_is_valid_base64_url">is_valid_base64_url</a> <span class="esymbol">(</span><span class="elocal">a_input</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`mime_line_length' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_mime_line_length">Mime_line_length</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`padding_char' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_padding_char">Padding_char</a><span class="esymbol">:</span> <a class="eclass" href="../base/character_8_chart.html">CHARACTER_8</a></span>
+	<span title="`standard_alphabet' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_standard_alphabet">Standard_alphabet</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`to_data_uri' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_to_data_uri">to_data_uri</a> <span class="esymbol">(</span><span class="elocal">a_data</span><span class="esymbol">,</span> <span class="elocal">a_mediatype</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`to_data_uri_bytes' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_to_data_uri_bytes">to_data_uri_bytes</a> <span class="esymbol">(</span><span class="elocal">a_bytes</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/natural_8_chart.html">NATURAL_8</a><span class="esymbol">]</span><span class="esymbol">;</span> <span class="elocal">a_mediatype</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`to_standard' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_to_standard">to_standard</a> <span class="esymbol">(</span><span class="elocal">a_base64url</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`to_url_safe' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_to_url_safe">to_url_safe</a> <span class="esymbol">(</span><span class="elocal">a_base64</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`url_safe_alphabet' is declared in `Current'"><a class="efeature" href="../simple_base64/simple_base64_short.html#f_url_safe_alphabet">Url_safe_alphabet</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+
+<span class="ekeyword">Constraints</span>
+	<span class="etag">standard alphabet 64</span>
+	<span class="etag">url safe alphabet 64</span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_base64_links.html">Relations</a>
+<a class="nav class" href="simple_base64_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_base64"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>

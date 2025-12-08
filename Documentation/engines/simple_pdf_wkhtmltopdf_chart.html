@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="PDF engine using wkhtmltopdf (Qt WebKit based)"/>
+<meta name="author" content="Your Organization"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>simple_pdf_wkhtmltopdf Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_pdf_wkhtmltopdf_links.html">Relations</a>
+<a class="nav class" href="simple_pdf_wkhtmltopdf_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_pdf_wkhtmltopdf"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../engines/simple_pdf_wkhtmltopdf_chart.html">SIMPLE_PDF_WKHTMLTOPDF</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../engines/index.html">engines</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> <span class="estring">&quot;PDF engine using wkhtmltopdf (Qt WebKit based)&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_make">make</a><span class="esymbol">,</span> <a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_make_with_path">make_with_path</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../core/simple_pdf_engine_chart.html">SIMPLE_PDF_ENGINE</a><span class="echar">*</span>
+
+<span class="ekeyword">Queries</span>
+	<span title="`executable_path' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_executable_path">executable_path</a><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`is_available' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_is_available">is_available</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`last_error' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_last_error">last_error</a><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`margin_bottom' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_margin_bottom">margin_bottom</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`margin_left' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_margin_left">margin_left</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`margin_right' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_margin_right">margin_right</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`margin_top' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_margin_top">margin_top</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`name' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_name">Name</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`orientation' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_orientation">orientation</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`page_size' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_page_size">page_size</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`render_file' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_render_file">render_file</a> <span class="esymbol">(</span><span class="elocal">a_path</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../core/simple_pdf_document_chart.html">SIMPLE_PDF_DOCUMENT</a></span>
+	<span title="`render_html' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_render_html">render_html</a> <span class="esymbol">(</span><span class="elocal">a_html</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../core/simple_pdf_document_chart.html">SIMPLE_PDF_DOCUMENT</a></span>
+	<span title="`render_url' is declared in `Current'"><a class="efeature" href="../engines/simple_pdf_wkhtmltopdf_short.html#f_render_url">render_url</a> <span class="esymbol">(</span><span class="elocal">a_url</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../core/simple_pdf_document_chart.html">SIMPLE_PDF_DOCUMENT</a></span>
+
+<span class="ekeyword">Commands</span>
+	<span title="`set_margin_bottom' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_margin_bottom">set_margin_bottom</a> <span class="esymbol">(</span><span class="elocal">a_margin</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_margin_left' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_margin_left">set_margin_left</a> <span class="esymbol">(</span><span class="elocal">a_margin</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_margin_right' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_margin_right">set_margin_right</a> <span class="esymbol">(</span><span class="elocal">a_margin</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_margin_top' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_margin_top">set_margin_top</a> <span class="esymbol">(</span><span class="elocal">a_margin</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_margins' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_margins">set_margins</a> <span class="esymbol">(</span><span class="elocal">a_margin</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_orientation' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_orientation">set_orientation</a> <span class="esymbol">(</span><span class="elocal">a_orientation</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+	<span title="`set_page_size' was declared in SIMPLE_PDF_ENGINE"><a class="efeature" href="../core/simple_pdf_engine_short.html#f_set_page_size">set_page_size</a> <span class="esymbol">(</span><span class="elocal">a_size</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span></span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="simple_pdf_wkhtmltopdf_links.html">Relations</a>
+<a class="nav class" href="simple_pdf_wkhtmltopdf_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="simple_pdf_wkhtmltopdf"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>
