@@ -172,7 +172,7 @@ feature {NONE} -- Implementation
 				end
 
 				create l_proc.make
-				l_proc.execute (l_cmd)
+				l_proc.run (l_cmd)
 
 				if attached l_proc.last_output as l_out then
 					Result := l_out.to_string_8
