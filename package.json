@@ -1,0 +1,9 @@
+{
+  "name": "simple_pdf",
+  "version": "0.1.0",
+  "description": "Simple PDF generation and text extraction library",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "document",
+  "keywords": ["pdf", "document", "generation", "parsing"]
+}
