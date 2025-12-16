@@ -60,20 +60,22 @@ end
 For projects that only need PDF functionality:
 
 1. Clone the repository
-2. Set environment variable: `SIMPLE_PDF=D:\path\to\simple_pdf`
+2. Set environment variable (one-time setup for all simple_* libraries): `SIMPLE_EIFFEL=D:\prod`
 3. Add to your ECF:
 
 ```xml
-<library name="simple_pdf" location="$SIMPLE_PDF\simple_pdf.ecf"/>
+<library name="simple_pdf" location="$SIMPLE_EIFFEL/simple_pdf/simple_pdf.ecf"/>
 ```
 
 ## Dependencies
 
-| Library | Purpose | Environment Variable |
-|---------|---------|---------------------|
-| [simple_json](https://github.com/simple-eiffel/simple_json) | JSON support | `$SIMPLE_JSON` |
-| [simple_uuid](https://github.com/simple-eiffel/simple_uuid) | Temp file naming | `$SIMPLE_UUID` |
-| [simple_base64](https://github.com/simple-eiffel/simple_base64) | Base64 encoding | `$SIMPLE_BASE64` |
+| Library | Purpose |
+|---------|---------|
+| [simple_json](https://github.com/simple-eiffel/simple_json) | JSON support |
+| [simple_uuid](https://github.com/simple-eiffel/simple_uuid) | Temp file naming |
+| [simple_base64](https://github.com/simple-eiffel/simple_base64) | Base64 encoding |
+
+All dependencies are resolved via `$SIMPLE_EIFFEL`.
 
 ## Quick Start
 
