@@ -20,8 +20,8 @@
 		<!-- Core libraries -->
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="encoding" location="$ISE_LIBRARY\library\encoding\encoding.ecf"/>
-		<library name="simple_process" location="$SIMPLE_PROCESS\simple_process.ecf"/>
-		<library name="simple_uuid" location="$SIMPLE_UUID/simple_uuid.ecf"/>
+		<library name="simple_process" location="$SIMPLE_EIFFEL/simple_process/simple_process.ecf"/>
+		<library name="simple_uuid" location="$SIMPLE_EIFFEL/simple_uuid/simple_uuid.ecf"/>
 		<!-- simple_* dependencies -->
 		<library name="simple_base64" location="$SIMPLE_BASE64\simple_base64.ecf"/>
 		<!-- Source clusters -->
@@ -35,7 +35,7 @@
 		</option>
 		<setting name="console_application" value="true"/>
 		<setting name="total_order_on_reals" value="true"/>
-		<library name="simple_testing" location="$SIMPLE_TESTING\simple_testing.ecf"/>
+		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
 		<cluster name="test_classes" location=".\testing\" recursive="true"/>
 	</target>
