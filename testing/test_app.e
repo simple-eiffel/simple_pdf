@@ -409,10 +409,10 @@ feature {NONE} -- Helpers
 			l_dir: DIRECTORY
 		do
 			create l_env
-			if attached l_env.item ("SIMPLE_PDF") as l_path then
-				Result := l_path.to_string_8 + "/tests/outputs"
+			if attached l_env.item ("SIMPLE_EIFFEL") as l_root then
+				Result := l_root.to_string_8 + "/simple_pdf/testing/outputs"
 			else
-				Result := "tests/outputs"
+				Result := "testing/outputs"
 			end
 			-- Ensure directory exists
 			create l_dir.make (Result)

@@ -1,0 +1,297 @@
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @1          physical_not_exists:         
+<0000026BC1EA8128>                         Precondition violated.        Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP test_html_to_pdf @6                                 
+<0000026BC1E9C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP run_manual_tests @7                                 
+<0000026BC1E9C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP make @11                                            
+<0000026BC1E9C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP root's creation                                     
+<0000026BC1E9C588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<00000222E4B5F218>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<00000222E4B5F218>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<00000222E4B5F218>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP get_output_dir @7                                   
+<00000222E4B44588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP test_us_constitution @4
+<00000222E4B44588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP run_manual_tests @9                                 
+<00000222E4B44588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP make @11                                            
+<00000222E4B44588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+SIMPLE_PDF_TEST_APP root's creation                                     
+<00000222E4B44588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<000001E20A70C278>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<000001E20A70C278>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<000001E20A70C278>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<000001E20A6F15E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<000001E20A6F15E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<000001E20A6F15E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<000001E20A6F15E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<000001E20A6F15E8>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<000001E1B03F7288>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<000001E1B03F7288>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<000001E1B03F7288>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<000001E1B03DC5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<000001E1B03DC5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<000001E1B03DC5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<000001E1B03DC5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<000001E1B03DC5E8>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<0000022C7F8E8278>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<0000022C7F8E8278>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<0000022C7F8E8278>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<0000022C7F8CD5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<0000022C7F8CD5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<0000022C7F8CD5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<0000022C7F8CD5E8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<0000022C7F8CD5E8>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<000002329A8185F8>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<000002329A8185F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<000002329A8185F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<000002329A7FC588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<000002329A7FC588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<000002329A7FC588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<000002329A7FC588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<000002329A7FC588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<0000026C895C7608>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<0000026C895C7608>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<0000026C895C7608>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<0000026C895AB588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<0000026C895AB588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<0000026C895AB588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<0000026C895AB588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<0000026C895AB588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<000001BB95FA55F8>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<000001BB95FA55F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<000001BB95FA55F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<000001BB95F89588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<000001BB95F89588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<000001BB95F89588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<000001BB95F89588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<000001BB95F89588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
+
+simple_pdf: system execution failed.
+Following is the set of recorded exceptions:
+
+******************************** Thread exception *****************************
+In thread           Root thread            0x0 (thread id)
+*******************************************************************************
+-------------------------------------------------------------------------------
+Class / Object      Routine                Nature of exception           Effect
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir             No such file or directory:   
+<0000020E825585F8>                         Operating system error.       Fail
+-------------------------------------------------------------------------------
+DIRECTORY           file_mkdir                                          
+<0000020E825585F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+DIRECTORY           create_dir @2                                       
+<0000020E825585F8>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            get_output_dir @7                                   
+<0000020E8253C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            test_us_constitution @4
+<0000020E8253C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            run_manual_tests @9                                 
+<0000020E8253C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            make @11                                            
+<0000020E8253C588>                         Routine failure.              Fail
+-------------------------------------------------------------------------------
+TEST_APP            root's creation                                     
+<0000020E8253C588>                         Routine failure.              Exit
+-------------------------------------------------------------------------------
