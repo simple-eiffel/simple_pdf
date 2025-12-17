@@ -118,19 +118,34 @@ feature -- Conversion
 feature {NONE} -- Implementation
 
 	detect_executable
-			-- Detect Chrome executable location
+			-- Detect Chrome executable location (cross-platform)
 		local
 			l_file: RAW_FILE
 			l_candidates: ARRAYED_LIST [STRING]
 			l_path: STRING
 		do
-			-- Common Chrome locations on Windows
-			create l_candidates.make (5)
-			l_candidates.extend ("C:/Program Files/Google/Chrome/Application/chrome.exe")
-			l_candidates.extend ("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe")
-			l_candidates.extend ("C:/Users/" + user_name + "/AppData/Local/Google/Chrome/Application/chrome.exe")
-			l_candidates.extend ("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-			l_candidates.extend ("C:/Program Files/Microsoft/Edge/Application/msedge.exe")
+			create l_candidates.make (15)
+
+			if {PLATFORM}.is_windows then
+				-- Windows Chrome/Edge locations
+				l_candidates.extend ("C:/Program Files/Google/Chrome/Application/chrome.exe")
+				l_candidates.extend ("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe")
+				l_candidates.extend ("C:/Users/" + user_name + "/AppData/Local/Google/Chrome/Application/chrome.exe")
+				l_candidates.extend ("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
+				l_candidates.extend ("C:/Program Files/Microsoft/Edge/Application/msedge.exe")
+			else
+				-- Linux Chrome/Chromium locations
+				l_candidates.extend ("/usr/bin/google-chrome")
+				l_candidates.extend ("/usr/bin/google-chrome-stable")
+				l_candidates.extend ("/usr/bin/chromium")
+				l_candidates.extend ("/usr/bin/chromium-browser")
+				l_candidates.extend ("/snap/bin/chromium")
+				l_candidates.extend ("/usr/local/bin/chrome")
+				-- macOS Chrome locations
+				l_candidates.extend ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+				l_candidates.extend ("/Applications/Chromium.app/Contents/MacOS/Chromium")
+				l_candidates.extend ("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge")
+			end
 
 			from l_candidates.start until l_candidates.after or executable_path /= Void loop
 				l_path := l_candidates.item
@@ -143,15 +158,24 @@ feature {NONE} -- Implementation
 		end
 
 	user_name: STRING
-			-- Current user name
+			-- Current user name (cross-platform)
 		local
 			l_env: EXECUTION_ENVIRONMENT
 		do
 			create l_env
-			if attached l_env.item ("USERNAME") as l_user then
-				Result := l_user.to_string_8
+			if {PLATFORM}.is_windows then
+				if attached l_env.item ("USERNAME") as l_user then
+					Result := l_user.to_string_8
+				else
+					Result := "User"
+				end
 			else
-				Result := "User"
+				-- Linux/macOS: USER env var
+				if attached l_env.item ("USER") as l_user then
+					Result := l_user.to_string_8
+				else
+					Result := "user"
+				end
 			end
 		end
 
@@ -241,17 +265,26 @@ feature {NONE} -- Implementation
 		end
 
 	temp_directory: STRING
-			-- Get system temp directory
+			-- Get system temp directory (cross-platform)
 		local
 			l_env: EXECUTION_ENVIRONMENT
 		do
 			create l_env
-			if attached l_env.item ("TEMP") as l_temp then
-				Result := l_temp.to_string_8
-			elseif attached l_env.item ("TMP") as l_tmp then
-				Result := l_tmp.to_string_8
+			if {PLATFORM}.is_windows then
+				if attached l_env.item ("TEMP") as l_temp then
+					Result := l_temp.to_string_8
+				elseif attached l_env.item ("TMP") as l_tmp then
+					Result := l_tmp.to_string_8
+				else
+					Result := "."
+				end
 			else
-				Result := "."
+				-- Linux/macOS: TMPDIR or /tmp
+				if attached l_env.item ("TMPDIR") as l_tmpdir then
+					Result := l_tmpdir.to_string_8
+				else
+					Result := "/tmp"
+				end
 			end
 		end
 

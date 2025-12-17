@@ -231,7 +231,7 @@ feature -- Extraction
 feature {NONE} -- Implementation
 
 	detect_executable
-			-- Detect pdftotext.exe location
+			-- Detect pdftotext location (cross-platform)
 		local
 			l_file: RAW_FILE
 			l_candidates: ARRAYED_LIST [STRING]
@@ -242,11 +242,23 @@ feature {NONE} -- Implementation
 			create l_env
 			l_cwd := l_env.current_working_path.name.to_string_8
 
-			create l_candidates.make (4)
-			l_candidates.extend ("bin/pdftotext.exe")
-			l_candidates.extend ("pdftotext.exe")
-			l_candidates.extend ("C:/Program Files/poppler/bin/pdftotext.exe")
-			l_candidates.extend ("C:/Program Files (x86)/poppler/bin/pdftotext.exe")
+			create l_candidates.make (10)
+
+			if {PLATFORM}.is_windows then
+				-- Windows locations
+				l_candidates.extend ("bin/pdftotext.exe")
+				l_candidates.extend ("pdftotext.exe")
+				l_candidates.extend ("C:/Program Files/poppler/bin/pdftotext.exe")
+				l_candidates.extend ("C:/Program Files (x86)/poppler/bin/pdftotext.exe")
+			else
+				-- Linux/macOS locations
+				l_candidates.extend ("/usr/bin/pdftotext")
+				l_candidates.extend ("/usr/local/bin/pdftotext")
+				l_candidates.extend ("/opt/homebrew/bin/pdftotext")  -- macOS Homebrew ARM
+				l_candidates.extend ("/usr/local/opt/poppler/bin/pdftotext")  -- macOS Homebrew Intel
+				l_candidates.extend ("bin/pdftotext")
+				l_candidates.extend ("pdftotext")
+			end
 
 			from
 				l_candidates.start
@@ -267,18 +279,28 @@ feature {NONE} -- Implementation
 			end
 
 			if executable_path = Void then
-				executable_path := find_in_path ("pdftotext.exe")
+				if {PLATFORM}.is_windows then
+					executable_path := find_in_path ("pdftotext.exe")
+				else
+					executable_path := find_in_path ("pdftotext")
+				end
 			end
 		end
 
 	find_in_path (a_name: STRING): detachable STRING
-			-- Find executable in system PATH
+			-- Find executable in system PATH (cross-platform)
 		local
 			l_proc: SIMPLE_PROCESS
 			l_result: STRING_32
+			l_cmd: STRING
 		do
 			create l_proc.make
-			l_proc.run ("cmd /c where " + a_name)
+			if {PLATFORM}.is_windows then
+				l_cmd := "cmd /c where " + a_name
+			else
+				l_cmd := "which " + a_name
+			end
+			l_proc.run (l_cmd)
 			if l_proc.was_successful and then attached l_proc.last_output as l_out then
 				l_result := l_out.twin
 				l_result.prune_all ('%R')
@@ -319,17 +341,26 @@ feature {NONE} -- Implementation
 		end
 
 	get_temp_directory: STRING
-			-- Get system temp directory
+			-- Get system temp directory (cross-platform)
 		local
 			l_env: EXECUTION_ENVIRONMENT
 		do
 			create l_env
-			if attached l_env.item ("TEMP") as l_temp then
-				Result := l_temp.to_string_8
-			elseif attached l_env.item ("TMP") as l_tmp then
-				Result := l_tmp.to_string_8
+			if {PLATFORM}.is_windows then
+				if attached l_env.item ("TEMP") as l_temp then
+					Result := l_temp.to_string_8
+				elseif attached l_env.item ("TMP") as l_tmp then
+					Result := l_tmp.to_string_8
+				else
+					Result := "."
+				end
 			else
-				Result := "."
+				-- Linux/macOS: TMPDIR or /tmp
+				if attached l_env.item ("TMPDIR") as l_tmpdir then
+					Result := l_tmpdir.to_string_8
+				else
+					Result := "/tmp"
+				end
 			end
 		end
 

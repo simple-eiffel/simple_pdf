@@ -138,7 +138,7 @@ feature -- Conversion
 feature {NONE} -- Implementation
 
 	detect_executable
-			-- Detect wkhtmltopdf.exe location
+			-- Detect wkhtmltopdf location (cross-platform)
 		local
 			l_file: RAW_FILE
 			l_candidates: ARRAYED_LIST [STRING]
@@ -149,12 +149,23 @@ feature {NONE} -- Implementation
 			create l_env
 			l_cwd := l_env.current_working_path.name.to_string_8
 
-			-- Check common locations
-			create l_candidates.make (4)
-			l_candidates.extend ("bin/wkhtmltopdf.exe")
-			l_candidates.extend ("wkhtmltopdf.exe")
-			l_candidates.extend ("C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-			l_candidates.extend ("C:/Program Files (x86)/wkhtmltopdf/bin/wkhtmltopdf.exe")
+			create l_candidates.make (10)
+
+			if {PLATFORM}.is_windows then
+				-- Windows locations
+				l_candidates.extend ("bin/wkhtmltopdf.exe")
+				l_candidates.extend ("wkhtmltopdf.exe")
+				l_candidates.extend ("C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+				l_candidates.extend ("C:/Program Files (x86)/wkhtmltopdf/bin/wkhtmltopdf.exe")
+			else
+				-- Linux/macOS locations
+				l_candidates.extend ("/usr/bin/wkhtmltopdf")
+				l_candidates.extend ("/usr/local/bin/wkhtmltopdf")
+				l_candidates.extend ("/opt/homebrew/bin/wkhtmltopdf")  -- macOS Homebrew ARM
+				l_candidates.extend ("/usr/local/opt/wkhtmltopdf/bin/wkhtmltopdf")  -- macOS Homebrew Intel
+				l_candidates.extend ("bin/wkhtmltopdf")
+				l_candidates.extend ("wkhtmltopdf")
+			end
 
 			from l_candidates.start until l_candidates.after or executable_path /= Void loop
 				l_path := l_candidates.item
@@ -170,20 +181,30 @@ feature {NONE} -- Implementation
 				l_candidates.forth
 			end
 
-			-- Fallback: check PATH using 'where' command
+			-- Fallback: check PATH
 			if executable_path = Void then
-				executable_path := find_in_path ("wkhtmltopdf.exe")
+				if {PLATFORM}.is_windows then
+					executable_path := find_in_path ("wkhtmltopdf.exe")
+				else
+					executable_path := find_in_path ("wkhtmltopdf")
+				end
 			end
 		end
 
 	find_in_path (a_name: STRING): detachable STRING
-			-- Find executable in system PATH
+			-- Find executable in system PATH (cross-platform)
 		local
 			l_proc: SIMPLE_PROCESS
 			l_result: STRING_32
+			l_cmd: STRING
 		do
 			create l_proc.make
-			l_proc.run ("cmd /c where " + a_name)
+			if {PLATFORM}.is_windows then
+				l_cmd := "cmd /c where " + a_name
+			else
+				l_cmd := "which " + a_name
+			end
+			l_proc.run (l_cmd)
 			if l_proc.was_successful and then attached l_proc.last_output as l_out then
 				l_result := l_out.twin
 				l_result.prune_all ('%R')
@@ -251,17 +272,26 @@ feature {NONE} -- Implementation
 		end
 
 	temp_directory: STRING
-			-- Get system temp directory
+			-- Get system temp directory (cross-platform)
 		local
 			l_env: EXECUTION_ENVIRONMENT
 		do
 			create l_env
-			if attached l_env.item ("TEMP") as l_temp then
-				Result := l_temp.to_string_8
-			elseif attached l_env.item ("TMP") as l_tmp then
-				Result := l_tmp.to_string_8
+			if {PLATFORM}.is_windows then
+				if attached l_env.item ("TEMP") as l_temp then
+					Result := l_temp.to_string_8
+				elseif attached l_env.item ("TMP") as l_tmp then
+					Result := l_tmp.to_string_8
+				else
+					Result := "."
+				end
 			else
-				Result := "."
+				-- Linux/macOS: TMPDIR or /tmp
+				if attached l_env.item ("TMPDIR") as l_tmpdir then
+					Result := l_tmpdir.to_string_8
+				else
+					Result := "/tmp"
+				end
 			end
 		end
 
