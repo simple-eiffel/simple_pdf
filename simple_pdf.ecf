@@ -24,9 +24,11 @@
 		<library name="simple_uuid" location="$SIMPLE_EIFFEL/simple_uuid/simple_uuid.ecf"/>
 		<!-- simple_* dependencies -->
 		<library name="simple_base64" location="$SIMPLE_EIFFEL/simple_base64/simple_base64.ecf"/>
+		<library name="simple_cairo" location="$SIMPLE_EIFFEL/simple_cairo/simple_cairo.ecf"/>
 		<!-- Source clusters -->
 		<cluster name="core" location=".\src\core\" recursive="true"/>
 		<cluster name="engines" location=".\src\engines\" recursive="true"/>
+		<cluster name="music" location=".\src\music\" recursive="true"/>
 	</target>
 	<target name="simple_pdf_tests" extends="simple_pdf">
 		<root class="TEST_APP" feature="make"/>
