@@ -205,8 +205,9 @@ feature {NONE} -- Implementation
 				l_cmd := "which " + a_name
 			end
 			l_proc.run (l_cmd)
-			if l_proc.was_successful and then attached l_proc.last_output as l_out then
-				l_result := l_out.twin
+			if l_proc.was_successful and then attached l_proc.last_output_bytes as l_out then
+					-- Raw bytes, as before simple_process 1.1.0 decoded `last_output'.
+				l_result := l_out.to_string_32
 				l_result.prune_all ('%R')
 				l_result.prune_all ('%N')
 				if not l_result.is_empty and then not l_result.has_substring ({STRING_32} "INFO:") then
@@ -234,10 +235,11 @@ feature {NONE} -- Implementation
 				create l_proc.make
 				l_proc.run (l_cmd)
 
-				if attached l_proc.last_output as l_out then
-					Result := l_out.to_string_8
+				if attached l_proc.last_output_bytes as l_out then
+						-- Raw bytes, as before simple_process 1.1.0 decoded `last_output'.
+					Result := l_out.twin
 				elseif attached l_proc.last_error as l_err then
-					Result := "Error: " + l_err.to_string_8
+					Result := "Error: " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_err)
 				else
 					Result := "Failed to execute wkhtmltopdf"
 				end

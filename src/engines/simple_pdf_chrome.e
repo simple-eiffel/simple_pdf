@@ -198,10 +198,11 @@ feature {NONE} -- Implementation
 				create l_proc.make
 				l_proc.run (l_cmd)
 
-				if attached l_proc.last_output as l_out then
-					Result := l_out.to_string_8
+				if attached l_proc.last_output_bytes as l_out then
+						-- Raw bytes, as before simple_process 1.1.0 decoded `last_output'.
+					Result := l_out.twin
 				elseif attached l_proc.last_error as l_err then
-					Result := "Error: " + l_err.to_string_8
+					Result := "Error: " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_err)
 				else
 					Result := "Failed to execute Chrome"
 				end
