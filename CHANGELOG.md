@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (process output)
+- Tool output is returned as the raw bytes (`last_output_bytes`, simple_process
+  1.1.0), not `to_string_8` of the now-decoded text, which failed above U+00FF
+  and would have broken callers that decode it as UTF-8.
+
+
 ### Changed
 - Testing config updates, AutoTest fixes, .gitignore cleanup
 - Add SCOOP capability, migrate to simple_process
