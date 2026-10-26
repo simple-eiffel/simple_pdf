@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Changed
+- 2026-10-26: dropped the ISE `encoding` library from the ECF; nothing used it (clean build, 10 pass).
 - Testing config updates, AutoTest fixes, .gitignore cleanup
 - Add SCOOP capability, migrate to simple_process
 - Migrate to simple_testing library
