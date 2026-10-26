@@ -19,7 +19,6 @@
 		<variable name="SIMPLE_PDF" value="$SIMPLE_EIFFEL/simple_pdf"/>
 		<!-- Core libraries -->
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
-		<library name="encoding" location="$ISE_LIBRARY\library\encoding\encoding.ecf"/>
 		<library name="simple_process" location="$SIMPLE_EIFFEL/simple_process/simple_process.ecf"/>
 		<library name="simple_uuid" location="$SIMPLE_EIFFEL/simple_uuid/simple_uuid.ecf"/>
 		<!-- simple_* dependencies -->
