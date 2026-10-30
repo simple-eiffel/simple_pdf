@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- 2026-10-30: `SIMPLE_PDF_READER.extract_text_flowing`: text in reading order, decoded
+  from UTF-8, with no page-break characters (`-enc UTF-8 -nopgbrk`), for prose readers
+  such as simple_bible's ingest kits; `-layout` pads columns and `-raw` drops spaces
+  some PDFs only imply.
+
 ### Fixed (process output)
 - Tool output is returned as the raw bytes (`last_output_bytes`, simple_process
   1.1.0), not `to_string_8` of the now-decoded text, which failed above U+00FF
