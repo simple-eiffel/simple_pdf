@@ -94,6 +94,7 @@ feature -- Manual Tests
 			-- Test PDF reading
 			test_pdf_reader
 			test_pdf_reader_flowing
+			test_pdf_reader_no_text
 		end
 
 	test_html_to_pdf
@@ -248,6 +249,41 @@ feature -- Manual Tests
 			else
 				print ("  SKIPPED: pdftotext not available%N")
 			end
+		end
+
+	test_pdf_reader_no_text
+			-- 2026-10-30: a PDF with no text (scanned pages; here a blank page) gives empty text, not a
+			-- failed precondition reading pdftotext's empty output.
+		local
+			l_reader: SIMPLE_PDF_READER
+			l_blank: STRING
+		do
+			print ("Test: PDF with no text%N")
+			create l_reader.make
+			l_blank := "testing/fixtures/blank_page.pdf"
+			if l_reader.is_available and (create {RAW_FILE}.make_with_name (l_blank)).exists then
+					-- (the layout and raw modes write a page break for each page, text or none)
+				if l_reader.extract_text_flowing (l_blank).is_empty and no_text (l_reader.extract_text (l_blank)) and no_text (l_reader.extract_text_raw (l_blank)) then
+					print ("  SUCCESS: empty text, no failure%N")
+					passed := passed + 1
+				else
+					print ("  FAILED: text from a blank page%N")
+					failed := failed + 1
+				end
+			else
+				print ("  SKIPPED: pdftotext or the fixture not available%N")
+			end
+		end
+
+	no_text (a_text: STRING): BOOLEAN
+			-- Does `a_text' hold nothing but page breaks and white space?
+		local
+			l_text: STRING
+		do
+			l_text := a_text.twin
+			l_text.prune_all ('%F')
+			l_text.left_adjust
+			Result := l_text.is_empty
 		end
 
 	test_us_constitution

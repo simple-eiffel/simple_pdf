@@ -93,8 +93,13 @@ feature -- Extraction
 			create l_raw.make_with_name (l_temp_txt)
 			if l_raw.exists then
 				create l_file.make_open_read (l_temp_txt)
-				l_file.read_stream (l_file.count.max (1))
-				Result := l_file.last_string
+				if l_file.count > 0 then
+					l_file.read_stream (l_file.count)
+					Result := l_file.last_string
+				else
+						-- 2026-10-30: a PDF with no text (scanned pages) leaves an empty file; reading one failed
+					create Result.make_empty
+				end
 				l_file.close
 				l_raw.delete
 				last_error := Void
@@ -131,8 +136,13 @@ feature -- Extraction
 			create l_raw.make_with_name (l_temp_txt)
 			if l_raw.exists then
 				create l_file.make_open_read (l_temp_txt)
-				l_file.read_stream (l_file.count.max (1))
-				Result := l_file.last_string
+				if l_file.count > 0 then
+					l_file.read_stream (l_file.count)
+					Result := l_file.last_string
+				else
+						-- 2026-10-30: a PDF with no text (scanned pages) leaves an empty file; reading one failed
+					create Result.make_empty
+				end
 				l_file.close
 				l_raw.delete
 				last_error := Void
@@ -169,8 +179,13 @@ feature -- Extraction
 			create l_file.make_with_name (l_temp_txt)
 			if l_file.exists then
 				l_file.open_read
-				l_file.read_stream (l_file.count.max (1))
-				Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (l_file.last_string)
+				if l_file.count > 0 then
+					l_file.read_stream (l_file.count)
+					Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (l_file.last_string)
+				else
+						-- a PDF with no text (scanned pages) leaves an empty file
+					create Result.make_empty
+				end
 				l_file.close
 				l_file.delete
 				last_error := Void
@@ -214,8 +229,13 @@ feature -- Extraction
 			create l_raw.make_with_name (l_temp_txt)
 			if l_raw.exists then
 				create l_file.make_open_read (l_temp_txt)
-				l_file.read_stream (l_file.count.max (1))
-				Result := l_file.last_string
+				if l_file.count > 0 then
+					l_file.read_stream (l_file.count)
+					Result := l_file.last_string
+				else
+						-- 2026-10-30: a PDF with no text (scanned pages) leaves an empty file; reading one failed
+					create Result.make_empty
+				end
 				l_file.close
 				l_raw.delete
 				last_error := Void
@@ -257,8 +277,13 @@ feature -- Extraction
 			create l_raw.make_with_name (l_temp_txt)
 			if l_raw.exists then
 				create l_file.make_open_read (l_temp_txt)
-				l_file.read_stream (l_file.count.max (1))
-				Result := l_file.last_string
+				if l_file.count > 0 then
+					l_file.read_stream (l_file.count)
+					Result := l_file.last_string
+				else
+						-- 2026-10-30: a PDF with no text (scanned pages) leaves an empty file; reading one failed
+					create Result.make_empty
+				end
 				l_file.close
 				l_raw.delete
 				last_error := Void
