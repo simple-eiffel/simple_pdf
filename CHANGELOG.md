@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (a PDF with no text)
+- 2026-10-30: every extract feature read pdftotext's output with `read_stream (count.max (1))`,
+  which failed a precondition on the empty file a PDF without a text layer (scanned pages)
+  leaves; they return empty text now. Test: `testing/fixtures/blank_page.pdf`.
+
 ### Added
 - 2026-10-30: `SIMPLE_PDF_READER.extract_text_flowing`: text in reading order, decoded
   from UTF-8, with no page-break characters (`-enc UTF-8 -nopgbrk`), for prose readers
