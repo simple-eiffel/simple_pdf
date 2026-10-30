@@ -93,6 +93,7 @@ feature -- Manual Tests
 
 			-- Test PDF reading
 			test_pdf_reader
+			test_pdf_reader_flowing
 		end
 
 	test_html_to_pdf
@@ -211,6 +212,34 @@ feature -- Manual Tests
 						if attached l_reader.last_error as l_err then
 							print ("  Error: " + l_err + "%N")
 						end
+						failed := failed + 1
+					end
+				else
+					print ("  SKIPPED: No test PDF available (run HTML test first)%N")
+				end
+			else
+				print ("  SKIPPED: pdftotext not available%N")
+			end
+		end
+
+	test_pdf_reader_flowing
+			-- 2026-10-30: text in reading order, decoded, no page breaks.
+		local
+			l_reader: SIMPLE_PDF_READER
+			l_text: STRING_32
+			l_test_pdf: STRING
+		do
+			print ("Test: PDF Text Extraction (flowing)%N")
+			create l_reader.make
+			if l_reader.is_available then
+				l_test_pdf := get_temp_dir + "/simple_pdf_test_output.pdf"
+				if (create {RAW_FILE}.make_with_name (l_test_pdf)).exists then
+					l_text := l_reader.extract_text_flowing (l_test_pdf)
+					if not l_text.is_empty and not l_text.has ('%F') then
+						print ("  SUCCESS: Extracted " + l_text.count.out + " characters, no page breaks%N")
+						passed := passed + 1
+					else
+						print ("  FAILED: empty, or a page break left in%N")
 						failed := failed + 1
 					end
 				else

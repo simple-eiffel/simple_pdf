@@ -142,6 +142,46 @@ feature -- Extraction
 			end
 		end
 
+	extract_text_flowing (a_pdf_path: STRING): STRING_32
+			-- The text of the PDF at `a_pdf_path' in reading order, decoded from UTF-8, with no page-break
+			-- characters: what prose wants (2026-10-30, for simple_bible's ingest kits). `-layout' pads
+			-- lines into columns and `-raw' drops spaces some PDFs only imply; this mode keeps both.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+			file_exists: (create {RAW_FILE}.make_with_name (a_pdf_path)).exists
+			is_available: is_available
+		local
+			l_temp_txt: STRING
+			l_uuid: SIMPLE_UUID
+			l_args: ARRAYED_LIST [STRING]
+			l_output: STRING
+			l_file: RAW_FILE
+		do
+			create l_uuid.make
+			l_temp_txt := get_temp_directory + "/simple_pdf_" + l_uuid.new_v4_string + ".txt"
+			create l_args.make (6)
+			l_args.extend ("-enc")
+			l_args.extend ("UTF-8")
+			l_args.extend ("-nopgbrk")
+			l_args.extend (a_pdf_path)
+			l_args.extend (l_temp_txt)
+			l_output := execute_pdftotext (l_args)
+			create l_file.make_with_name (l_temp_txt)
+			if l_file.exists then
+				l_file.open_read
+				l_file.read_stream (l_file.count.max (1))
+				Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (l_file.last_string)
+				l_file.close
+				l_file.delete
+				last_error := Void
+			else
+				create Result.make_empty
+				last_error := "pdftotext failed: " + l_output
+			end
+		ensure
+			no_page_breaks: not Result.has ('%F')
+		end
+
 	extract_page (a_pdf_path: STRING; a_page: INTEGER): STRING
 			-- Extract text from specific page
 		require
