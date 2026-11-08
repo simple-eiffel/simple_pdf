@@ -4,6 +4,8 @@
 
 # simple_pdf
 
+![Windows: tests pass](https://img.shields.io/badge/Windows-tests%20pass-0078D6?logo=windows&logoColor=white) ![Linux: tests pass](https://img.shields.io/badge/Linux-tests%20pass-FCC624?logo=linux&logoColor=black) ![macOS: tests pass](https://img.shields.io/badge/macOS-tests%20pass-000000?logo=apple&logoColor=white)
+
 **[Documentation](https://simple-eiffel.github.io/simple_pdf/)** | **[GitHub](https://github.com/simple-eiffel/simple_pdf)**
 
 PDF generation library for Eiffel with multi-engine support. Convert HTML, files, or URLs to PDF with bundled executables.
