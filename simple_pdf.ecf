@@ -36,6 +36,7 @@
 		</option>
 		<setting name="console_application" value="true"/>
 		<setting name="total_order_on_reals" value="true"/>
+		<library name="simple_hash" location="$SIMPLE_EIFFEL/simple_hash/simple_hash.ecf"/>
 		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
 		<cluster name="test_classes" location=".\testing\" recursive="true"/>

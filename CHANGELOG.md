@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (the cairo set is simple_cairo's)
+- 2026-11-11: the seven DLLs of the cairo set in `bin/` (cairo 1.18.0, fontconfig, freetype,
+  expat, libpng, pixman, zlib) are now owned by simple_cairo (`simple_cairo/runtime/windows/`,
+  simple_cairo PR 6), one version per DLL name across simple_*. `bin/` keeps byte-identical
+  copies because its helper programs load DLLs from their own folder; see `bin/README.md` and
+  issue 1 for their removal.
+- New test `test_bin_mirrors_the_owners_cairo_set`: fails if a copy differs from the owner's,
+  naming the file, both SHA-256 hashes and the owner.
+- New test `test_cairo_text_reads_back_through_the_helper`: text drawn into a PDF by this
+  process's cairo reads back through `pdftotext`. It fails on the old cairo 1.17.2, whose PDF
+  output broke at the first page.
+- The test runner now prints why a test failed.
+
 ### Fixed (a PDF with no text)
 - 2026-10-30: every extract feature read pdftotext's output with `read_stream (count.max (1))`,
   which failed a precondition on the empty file a PDF without a text layer (scanned pages)
