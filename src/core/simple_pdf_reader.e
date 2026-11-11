@@ -109,6 +109,20 @@ feature -- Extraction
 			end
 		end
 
+	page_count (a_pdf_path: STRING): INTEGER
+			-- How many pages the PDF at `a_pdf_path' has: pdftotext ends every page, with text or
+			-- without, with a page break (form feed). 0 when pdftotext fails (`last_error' says why).
+			-- 1v-c: how the printing tests check a job.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+			file_exists: (create {RAW_FILE}.make_with_name (a_pdf_path)).exists
+			is_available: is_available
+		do
+			Result := extract_text (a_pdf_path).occurrences ('%F')
+		ensure
+			non_negative: Result >= 0
+		end
+
 	extract_text_raw (a_pdf_path: STRING): STRING
 			-- Extract text without layout preservation (compact)
 		require
