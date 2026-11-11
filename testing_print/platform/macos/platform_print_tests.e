@@ -19,9 +19,17 @@ feature -- Running
 		do
 			a_run.call (agent test_pdfkit_and_poppler_draw_the_same_pages, "pdfkit_and_poppler_draw_the_same_pages")
 			a_run.call (agent test_has_printer_matches_the_system_list, "has_printer_matches_the_system_list")
+			a_run.call (agent test_the_text_survives_printing, "the_text_survives_printing")
 		end
 
 feature -- Tests
+
+	test_the_text_survives_printing
+			-- PDFKit's print path keeps the text layer: the printed job reads back with both
+			-- pages' text (the shared check, for the platforms whose path keeps text).
+		do
+			assert_text_survives_printing
+		end
 
 	test_pdfkit_and_poppler_draw_the_same_pages
 			-- The two-page test PDF has the same page count in PDFKit as in Poppler, and PDFKit's
