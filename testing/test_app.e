@@ -31,6 +31,8 @@ feature {NONE} -- Initialization
 			run_test (agent l_tests.test_simple_pdf_creation, "test_simple_pdf_creation")
 			run_test (agent l_tests.test_document_failed_creation, "test_document_failed_creation")
 			run_test (agent l_tests.test_reader_creation, "test_reader_creation")
+			run_test (agent l_tests.test_bin_mirrors_the_owners_cairo_set, "test_bin_mirrors_the_owners_cairo_set")
+			run_test (agent l_tests.test_cairo_text_reads_back_through_the_helper, "test_cairo_text_reads_back_through_the_helper")
 
 			-- Manual/Integration tests
 			run_manual_tests
@@ -62,6 +64,11 @@ feature {NONE} -- Test Infrastructure
 			end
 		rescue
 			print ("  FAIL: " + a_name + "%N")
+			if attached (create {EXCEPTION_MANAGER}).last_exception as al_exception then
+				if attached al_exception.description as al_text then
+					print ("        why: " + al_text.to_string_8 + "%N")
+				end
+			end
 			failed := failed + 1
 			l_retried := True
 			retry

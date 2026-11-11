@@ -394,6 +394,9 @@ The `bin/` folder contains Windows executables (total ~142MB):
 | wkhtmltox.dll | 0.12.6 | ~40MB | wkhtmltopdf library |
 | pdftotext.exe | 24.08.0 | ~57KB | Text extraction |
 | Poppler DLLs | 24.08.0 | ~22MB | pdftotext dependencies |
+| cairo set (7 DLLs) | cairo 1.18.0 | ~5MB | **owned by simple_cairo**; mirrored here, see below |
+
+**The cairo set is simple_cairo's, not simple_pdf's.** `cairo.dll`, `fontconfig-1.dll`, `freetype.dll`, `libexpat.dll`, `libpng16.dll`, `pixman-1-0.dll` and `zlib.dll` are owned by simple_cairo (`simple_cairo/runtime/windows/`): one version per DLL name across simple_* (BUILD_STANDARDS section 9). The helper programs here load DLLs from their own folder, so `bin/` carries byte-identical copies, and the test `test_bin_mirrors_the_owners_cairo_set` fails if any copy differs from the owner's. The copies go when staging lands ([issue 1](https://github.com/simple-eiffel/simple_pdf/issues/1)). See [bin/README.md](bin/README.md).
 
 ### Binary Sources
 
@@ -412,7 +415,9 @@ The `bin/` folder contains Windows executables (total ~142MB):
 **Poppler (pdftotext):**
 1. Download latest from [poppler-windows releases](https://github.com/oschwartz10612/poppler-windows/releases)
 2. Extract the `Library/bin/` contents
-3. Replace `pdftotext.exe` and DLLs in `bin/`
+3. Replace `pdftotext.exe` and the Poppler DLLs in `bin/`, but **not** the seven DLLs of the cairo set: copy those from
+   `simple_cairo/runtime/windows/`. A new Poppler build that needs a different cairo or neighbor version is a change to
+   simple_cairo's set first (its own pull request and gates), never a local replacement here.
 
 **Note:** wkhtmltopdf 0.12.6 (2020) is the final release. The project is no longer actively maintained but remains stable and widely used.
 
