@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-23-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-23-0 http://www.eiffel.com/developers/xml/configuration-1-23-0.xsd" name="simple_pdf_print" uuid="943F070D-91BF-4DDC-AA19-EC49520476E8" library_target="simple_pdf_print">
+	<description>Print an existing PDF through each platform's own printing (1v-c): Windows pdftocairo after simple_shell's dialog, Linux GtkPrintOperation with poppler-glib, macOS PDFKit. Separate from simple_pdf's HTML engines.</description>
+	<target name="simple_pdf_print">
+		<root all_classes="true"/>
+		<file_rule>
+			<exclude>/EIFGENs$</exclude>
+			<exclude>/\..*$</exclude>
+		</file_rule>
+		<option warning="warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="scoop" use="thread"/>
+			<void_safety support="all"/>
+		</capability>
+		<external_cflag value="`pkg-config --cflags gtk4 poppler-glib`">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</external_cflag>
+		<external_linker_flag value="`pkg-config --libs gtk4 poppler-glib`">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</external_linker_flag>
+		<external_linker_flag value="-framework Cocoa -framework PDFKit">
+			<condition>
+				<platform value="macintosh"/>
+			</condition>
+		</external_linker_flag>
+		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+		<!-- The reader (pdftotext): page count and text for the tests and callers -->
+		<library name="simple_pdf" location="$SIMPLE_EIFFEL/simple_pdf/simple_pdf.ecf"/>
+		<library name="simple_process" location="$SIMPLE_EIFFEL/simple_process/simple_process.ecf"/>
+		<!-- Windows: the print dialog (PrintDlgEx) and the printer list (SHELL_PRINTER) -->
+		<library name="simple_shell" location="$SIMPLE_EIFFEL/simple_shell/simple_shell.ecf">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</library>
+		<cluster name="print" location=".\src\print\">
+			<file_rule>
+				<exclude>/platform$</exclude>
+			</file_rule>
+		</cluster>
+		<cluster name="print_windows" location=".\src\print\platform\windows\">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</cluster>
+		<cluster name="print_linux" location=".\src\print\platform\linux\">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</cluster>
+		<cluster name="print_macos" location=".\src\print\platform\macos\">
+			<condition>
+				<platform value="macintosh"/>
+			</condition>
+		</cluster>
+	</target>
+	<target name="simple_pdf_print_tests" extends="simple_pdf_print">
+		<root class="PRINT_TEST_APP" feature="make"/>
+		<option warning="warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
+		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<library name="simple_cairo" location="$SIMPLE_EIFFEL/simple_cairo/simple_cairo.ecf"/>
+		<cluster name="print_tests" location=".\testing_print\">
+			<file_rule>
+				<exclude>/platform$</exclude>
+			</file_rule>
+		</cluster>
+		<cluster name="print_tests_windows" location=".\testing_print\platform\windows\">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</cluster>
+		<cluster name="print_tests_linux" location=".\testing_print\platform\linux\">
+			<condition>
+				<platform value="unix"/>
+			</condition>
+		</cluster>
+		<cluster name="print_tests_macos" location=".\testing_print\platform\macos\">
+			<condition>
+				<platform value="macintosh"/>
+			</condition>
+		</cluster>
+	</target>
+</system>
