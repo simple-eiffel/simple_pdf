@@ -14,6 +14,7 @@
 
 #include <string.h>
 #include <gtk/gtk.h>
+#include <gtk/gtkunixprint.h> /* GtkPrinter, gtk_enumerate_printers */
 #include <poppler.h>
 
 /* Make GTK usable from a console program too; 1 when it is. */
