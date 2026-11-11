@@ -82,7 +82,7 @@ feature -- Printing
 			l_dialog: SHELL_PRINT_DIALOG
 			l_reader: SIMPLE_PDF_READER
 			l_pages, i: INTEGER
-			l_args: ARRAYED_LIST [STRING_32]
+			l_first, l_last: INTEGER
 			l_folder, l_copy: STRING_32
 		do
 			if not has_printer then
@@ -107,16 +107,21 @@ feature -- Printing
 					if not copy_file (a_pdf_path, l_folder + "\" + l_copy) then
 						set_outcome (Outcome_failed, {STRING_32} "Could not prepare the job in " + l_folder + ".")
 					else
-						l_args := dialog_arguments (l_dialog)
-						l_args.extend (l_copy)
-						from
-							i := 1
-							run_helper (l_args, l_folder)
+						if l_dialog.is_all_pages then
+							l_first := 1
+							l_last := l_pages
+						else
+							l_first := l_dialog.first_page
+							l_last := l_dialog.last_page
+						end
+						across
+							job_runs (l_dialog.printer_name, l_first, l_last, l_dialog.copies, l_dialog.is_collated,
+								l_dialog.duplex, l_dialog.paper_source, l_copy, not l_dialog.is_all_pages) as ic
 						until
-							i >= l_dialog.copies or last_outcome /= Outcome_printed
+							i > 0 and last_outcome /= Outcome_printed
 						loop
 							i := i + 1
-							run_helper (l_args, l_folder)
+							run_helper (ic, l_folder)
 						end
 					end
 					delete_file (l_folder + "\" + l_copy)
@@ -228,7 +233,87 @@ feature -- The helper
 
 	Missing_helper: STRING_32 = "pdftocairo.exe was not found (simple_pdf's bin\ beside the program, or Poppler's install folder)."
 
+feature -- The runs a choice makes
+
+	job_runs (a_printer: READABLE_STRING_GENERAL; a_first, a_last, a_copies: INTEGER; a_collated: BOOLEAN;
+			a_duplex, a_source: INTEGER; a_file: READABLE_STRING_GENERAL; a_ranged: BOOLEAN): ARRAYED_LIST [ARRAYED_LIST [STRING_32]]
+			-- pdftocairo's argument lists for one print choice, one list per run: pages `a_first' to
+			-- `a_last' (`a_ranged': the user chose them; else every page, and `a_last' is the page
+			-- count or 0 when it is unknown), `a_copies' copies, collated or not, the dialog's
+			-- duplex (SHELL_PRINT_DIALOG's Duplex_*) and paper source (a DMBIN_ value), printing
+			-- `a_file'. Collated (or one copy, or an unknown page count): each copy prints the whole
+			-- range. Not collated: each page prints all its copies before the next page.
+		require
+			printer_named: not a_printer.is_empty
+			copies_positive: a_copies >= 1
+			range_valid: a_ranged implies (1 <= a_first and a_first <= a_last)
+			count_known_or_zero: not a_ranged implies (a_first = 1 and a_last >= 0)
+			file_named: not a_file.is_empty
+		local
+			l_page, k: INTEGER
+		do
+			create Result.make (a_copies)
+			if a_collated or a_copies = 1 or else (not a_ranged and a_last = 0) then
+				from k := 1 until k > a_copies loop
+					Result.extend (run_arguments (a_printer, a_duplex, a_source, a_ranged, a_first, a_last, a_file))
+					k := k + 1
+				end
+			else
+				from l_page := a_first until l_page > a_last loop
+					from k := 1 until k > a_copies loop
+						Result.extend (run_arguments (a_printer, a_duplex, a_source, True, l_page, l_page, a_file))
+						k := k + 1
+					end
+					l_page := l_page + 1
+				end
+			end
+		ensure
+			collated_count: (a_collated or a_copies = 1 or (not a_ranged and a_last = 0)) implies Result.count = a_copies
+			uncollated_count: not (a_collated or a_copies = 1 or (not a_ranged and a_last = 0)) implies Result.count = a_copies * (a_last - a_first + 1)
+		end
+
 feature {NONE} -- Running the helper
+
+	run_arguments (a_printer: READABLE_STRING_GENERAL; a_duplex, a_source: INTEGER; a_ranged: BOOLEAN;
+			a_first, a_last: INTEGER; a_file: READABLE_STRING_GENERAL): ARRAYED_LIST [STRING_32]
+			-- One pdftocairo run's arguments.
+		local
+			l_options: STRING_32
+		do
+			create Result.make (12)
+			Result.extend ({STRING_32} "-print")
+			Result.extend ({STRING_32} "-printer")
+			Result.extend (a_printer.to_string_32)
+			Result.extend ({STRING_32} "-origpagesizes")
+			if a_ranged then
+				Result.extend ({STRING_32} "-f")
+				Result.extend (a_first.out)
+				Result.extend ({STRING_32} "-l")
+				Result.extend (a_last.out)
+			end
+			create l_options.make_empty
+			inspect a_duplex
+			when {SHELL_PRINT_DIALOG}.Duplex_off then
+				l_options.append ({STRING_32} "duplex=off")
+			when {SHELL_PRINT_DIALOG}.Duplex_long_edge then
+				l_options.append ({STRING_32} "duplex=long")
+			when {SHELL_PRINT_DIALOG}.Duplex_short_edge then
+				l_options.append ({STRING_32} "duplex=short")
+			else
+			end
+			if attached source_name (a_source) as al_source then
+				if not l_options.is_empty then
+					l_options.append_character (',')
+				end
+				l_options.append ({STRING_32} "source=" + al_source)
+			end
+			if not l_options.is_empty then
+				Result.extend ({STRING_32} "-printopt")
+				Result.extend (l_options)
+			end
+			Result.extend (a_file.to_string_32)
+		end
+
 
 	run_helper (a_args: LIST [STRING_32]; a_folder: detachable STRING_32)
 			-- Run pdftocairo with `a_args' in `a_folder' (Void: the current one); its exit code
@@ -277,44 +362,6 @@ feature {NONE} -- Running the helper
 				end
 			else
 				set_outcome (Outcome_failed, Missing_helper)
-			end
-		end
-
-	dialog_arguments (a_dialog: SHELL_PRINT_DIALOG): ARRAYED_LIST [STRING_32]
-			-- pdftocairo's arguments for what `a_dialog' chose (the file name follows).
-		local
-			l_options: STRING_32
-		do
-			create Result.make (10)
-			Result.extend ({STRING_32} "-print")
-			Result.extend ({STRING_32} "-printer")
-			Result.extend (a_dialog.printer_name)
-			Result.extend ({STRING_32} "-origpagesizes")
-			if not a_dialog.is_all_pages then
-				Result.extend ({STRING_32} "-f")
-				Result.extend (a_dialog.first_page.out)
-				Result.extend ({STRING_32} "-l")
-				Result.extend (a_dialog.last_page.out)
-			end
-			create l_options.make_empty
-			inspect a_dialog.duplex
-			when {SHELL_PRINT_DIALOG}.Duplex_off then
-				l_options.append ({STRING_32} "duplex=off")
-			when {SHELL_PRINT_DIALOG}.Duplex_long_edge then
-				l_options.append ({STRING_32} "duplex=long")
-			when {SHELL_PRINT_DIALOG}.Duplex_short_edge then
-				l_options.append ({STRING_32} "duplex=short")
-			else
-			end
-			if attached source_name (a_dialog.paper_source) as al_source then
-				if not l_options.is_empty then
-					l_options.append_character (',')
-				end
-				l_options.append ({STRING_32} "source=" + al_source)
-			end
-			if not l_options.is_empty then
-				Result.extend ({STRING_32} "-printopt")
-				Result.extend (l_options)
 			end
 		end
 
