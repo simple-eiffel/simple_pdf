@@ -42,14 +42,16 @@ feature -- Outcomes
 
 feature -- Printing to a file
 
-	test_print_file_to_keeps_the_pages_and_text
-			-- A two-page PDF printed to a file through the platform's print path keeps its two pages
-			-- and its text.
+	test_print_file_to_keeps_the_pages_and_their_ink
+			-- A two-page PDF printed to a file through the platform's print path keeps its two pages,
+			-- and each printed page carries about the ink of the original page, rendered the same way.
+			-- (Ink, not text: Windows' print path draws text as shapes, so the job has no text layer;
+			-- the text check is a platform test where text survives.)
 		local
 			l_printer: SIMPLE_PDF_PRINTER
 			l_reader: SIMPLE_PDF_READER
 			l_in, l_out: STRING
-			l_text: STRING
+			l_page, l_before, l_after: INTEGER
 		do
 			l_in := temp_path ("simple_pdf_print_in.pdf")
 			l_out := temp_path ("simple_pdf_print_out.pdf")
@@ -60,12 +62,17 @@ feature -- Printing to a file
 			assert ("the input has two pages", l_reader.page_count (l_in) = 2)
 			create l_printer.make
 			l_printer.print_file_to (l_in, l_out)
-			assert ("printed: " + l_printer.last_outcome.out + " " + l_printer.last_error.to_string_8,
+			assert ("printed: " + l_printer.last_outcome.out + " " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_printer.last_error),
 				l_printer.last_outcome = l_printer.Outcome_printed)
 			assert ("the job has two pages: " + l_reader.page_count (l_out).out, l_reader.page_count (l_out) = 2)
-			l_text := l_reader.extract_text (l_out)
-			assert ("page one's text survives: [" + l_text + "]", l_text.has_substring ("First page of the print test"))
-			assert ("page two's text survives", l_text.has_substring ("Second page of the print test"))
+			from l_page := 1 until l_page > 2 loop
+				l_before := page_ink (l_in, l_page)
+				l_after := page_ink (l_out, l_page)
+				assert ("page " + l_page.out + " of the original has ink: " + l_before.out, l_before > 50)
+				assert ("page " + l_page.out + " printed with about its ink: " + l_after.out + " against " + l_before.out,
+					l_after * 2 >= l_before and l_after <= l_before * 2)
+				l_page := l_page + 1
+			end
 			delete_if_there (l_in)
 			delete_if_there (l_out)
 		end
@@ -92,6 +99,76 @@ feature -- Printing to a file
 		end
 
 feature -- Helpers, shared with each platform's tests
+
+	assert_text_survives_printing
+			-- Where the print path keeps a text layer (Linux, macOS), a two-page PDF printed to a file
+			-- reads back with both pages' text.
+		local
+			l_printer: SIMPLE_PDF_PRINTER
+			l_reader: SIMPLE_PDF_READER
+			l_in, l_out, l_text: STRING
+		do
+			l_in := temp_path ("simple_pdf_print_text_in.pdf")
+			l_out := temp_path ("simple_pdf_print_text_out.pdf")
+			delete_if_there (l_out)
+			write_two_pages (l_in)
+			create l_printer.make
+			l_printer.print_file_to (l_in, l_out)
+			assert ("printed", l_printer.last_outcome = l_printer.Outcome_printed)
+			create l_reader.make
+			l_text := l_reader.extract_text (l_out)
+			assert ("page one's text survives: [" + l_text + "]", l_text.has_substring ("First page of the print test"))
+			assert ("page two's text survives", l_text.has_substring ("Second page of the print test"))
+			delete_if_there (l_in)
+			delete_if_there (l_out)
+		end
+
+	page_ink (a_pdf: STRING; a_page: INTEGER): INTEGER
+			-- Dark pixels on page `a_page' of `a_pdf', rendered at 40 dots per inch by Poppler's
+			-- pdftocairo (the same renderer for the original and the printed job).
+		local
+			l_process: SIMPLE_PROCESS
+			l_base: STRING
+			l_image: CAIRO_SURFACE
+			l_pixels: MANAGED_POINTER
+			x, y: INTEGER
+			l_pixel: NATURAL_32
+		do
+			l_base := temp_path ("simple_pdf_print_ink")
+			delete_if_there (l_base + ".png")
+			create l_process.make
+			l_process.run ("%"" + pdftocairo_path + "%" -png -r 40 -f " + a_page.out + " -l " + a_page.out + " -singlefile %"" + a_pdf + "%" %"" + l_base + "%"")
+			assert ("pdftocairo rendered page " + a_page.out + " of " + a_pdf, (create {RAW_FILE}.make_with_name (l_base + ".png")).exists)
+			create l_image.make_from_png (l_base + ".png")
+			l_image.flush.do_nothing
+			create l_pixels.share_from_pointer (l_image.data, l_image.stride * l_image.height)
+			from y := 0 until y >= l_image.height loop
+				from x := 0 until x >= l_image.width loop
+					l_pixel := l_pixels.read_natural_32 (y * l_image.stride + x * 4)
+					if ((l_pixel |>> 16) & 0xFF) + ((l_pixel |>> 8) & 0xFF) + (l_pixel & 0xFF) < 384 then
+						Result := Result + 1
+					end
+					x := x + 1
+				end
+				y := y + 1
+			end
+			l_image.destroy
+			delete_if_there (l_base + ".png")
+		end
+
+	pdftocairo_path: STRING
+			-- Poppler's pdftocairo: simple_pdf's bin/ on Windows, the system's elsewhere.
+		do
+			if {PLATFORM}.is_windows then
+				Result := {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 ((create {EXECUTION_ENVIRONMENT}).current_working_path.name.to_string_32) + "/bin/pdftocairo.exe"
+			elseif (create {RAW_FILE}.make_with_name ("/opt/homebrew/bin/pdftocairo")).exists then
+				Result := "/opt/homebrew/bin/pdftocairo"
+			elseif (create {RAW_FILE}.make_with_name ("/usr/local/bin/pdftocairo")).exists then
+				Result := "/usr/local/bin/pdftocairo"
+			else
+				Result := "/usr/bin/pdftocairo"
+			end
+		end
 
 	write_two_pages (a_path: STRING)
 			-- A two-page Letter PDF at `a_path', drawn with cairo, one line of text on each page.

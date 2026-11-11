@@ -1,0 +1,462 @@
+note
+	description: "[
+		Printing an existing PDF on Windows (1v-c): simple_shell's print dialog, owned by the
+		parent window, then Poppler's own pdftocairo.exe -print, from simple_pdf's bin/ (the same
+		Poppler 24.08.0 build as pdftotext.exe), once per copy.
+
+		pdftocairo renders with Poppler onto cairo's Win32 printing surface. Passed on from the
+		dialog: the printer, the page range, copies (repeated, collated jobs), duplex, and the
+		paper source. Not passed on (named in the spec, said in the guide): the printer's own
+		Preferences (color mode, quality and other driver-private choices) and the dialog's paper
+		and orientation, because pdftocairo sizes each sheet from the PDF's own page.
+
+		The helper's arguments are encoded by the Windows rules, never through a shell; its run
+		has a timeout; its messages (Poppler's tools write UTF-8 on Windows) become `last_error'.
+
+		Poppler's Windows tools turn their command line into UTF-8 and pass the printer name to
+		the ANSI printer functions, so a printer named with characters outside ASCII cannot be
+		reached through pdftocairo: the run fails with pdftocairo's "not found" (named in the spec).
+	]"
+
+class
+	PDF_PRINT_PLATFORM
+
+inherit
+	PDF_PRINT_PLATFORM_API
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- A printer for existing PDFs.
+		do
+		end
+
+feature -- Status
+
+	has_printer: BOOLEAN
+			-- Does Windows list a printer? (Microsoft Print to PDF is a queue and counts.)
+		do
+			Result := not (create {SHELL_PRINTER}.make).printer_names.is_empty
+		end
+
+feature -- Paper
+
+	default_paper_width: REAL_64
+			-- The user's locale paper width, in points.
+		do
+			inspect locale_paper
+			when Locale_legal then
+				Result := 612.0
+			when Locale_a3 then
+				Result := 842.0
+			when Locale_a4 then
+				Result := 595.0
+			else
+				Result := 612.0
+			end
+		end
+
+	default_paper_height: REAL_64
+			-- The user's locale paper height, in points.
+		do
+			inspect locale_paper
+			when Locale_legal then
+				Result := 1008.0
+			when Locale_a3 then
+				Result := 1191.0
+			when Locale_a4 then
+				Result := 842.0
+			else
+				Result := 792.0
+			end
+		end
+
+feature -- Printing
+
+	print_file (a_pdf_path, a_title: READABLE_STRING_GENERAL; a_parent: POINTER)
+			-- simple_shell's print dialog over `a_parent', then pdftocairo once per copy.
+		local
+			l_dialog: SHELL_PRINT_DIALOG
+			l_reader: SIMPLE_PDF_READER
+			l_pages, i: INTEGER
+			l_args: ARRAYED_LIST [STRING_32]
+			l_folder, l_copy: STRING_32
+		do
+			if not has_printer then
+				set_outcome (Outcome_no_printer, "")
+			elseif helper_path = Void then
+				set_outcome (Outcome_failed, Missing_helper)
+			else
+				create l_reader.make
+				if l_reader.is_available then
+					l_pages := l_reader.page_count (utf_8 (a_pdf_path))
+				end
+				create l_dialog.make
+				l_dialog.show (a_parent, l_pages)
+				if l_dialog.last_answer = l_dialog.Answer_cancel then
+					set_outcome (Outcome_cancelled, "")
+				elseif l_dialog.last_answer = l_dialog.Answer_failed then
+					set_outcome (Outcome_failed, "The print dialog could not open (error " + l_dialog.last_error_code.out + ").")
+				else
+						-- pdftocairo names the job after its input file: print a copy named after the title
+					l_folder := new_temp_folder
+					l_copy := file_name_for (a_title)
+					if not copy_file (a_pdf_path, l_folder + "\" + l_copy) then
+						set_outcome (Outcome_failed, {STRING_32} "Could not prepare the job in " + l_folder + ".")
+					else
+						l_args := dialog_arguments (l_dialog)
+						l_args.extend (l_copy)
+						from
+							i := 1
+							run_helper (l_args, l_folder)
+						until
+							i >= l_dialog.copies or last_outcome /= Outcome_printed
+						loop
+							i := i + 1
+							run_helper (l_args, l_folder)
+						end
+					end
+					delete_file (l_folder + "\" + l_copy)
+					delete_folder (l_folder)
+				end
+			end
+		end
+
+	print_file_to (a_pdf_path, a_out_path: READABLE_STRING_GENERAL)
+			-- The test seam: pdftocairo to the Microsoft Print to PDF printer, which writes the job
+			-- to `a_out_path' (StartDoc's output file) with no dialog.
+		do
+			print_file_to_printer (a_pdf_path, File_printer, a_out_path)
+		end
+
+	print_file_to_printer (a_pdf_path, a_printer, a_out_path: READABLE_STRING_GENERAL)
+			-- Windows: pdftocairo to printer `a_printer', the job written to `a_out_path'.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+			pdf_exists: (create {RAW_FILE}.make_with_name (a_pdf_path)).exists
+			printer_not_empty: not a_printer.is_empty
+			out_not_empty: not a_out_path.is_empty
+			distinct: not a_out_path.same_string (a_pdf_path)
+		local
+			l_args: ARRAYED_LIST [STRING_32]
+		do
+			delete_file (a_out_path)
+			create l_args.make (6)
+			l_args.extend ({STRING_32} "-print")
+			l_args.extend ({STRING_32} "-printer")
+			l_args.extend (a_printer.to_string_32)
+			l_args.extend ({STRING_32} "-origpagesizes")
+			l_args.extend (a_pdf_path.to_string_32)
+			l_args.extend (a_out_path.to_string_32)
+			run_helper (l_args, Void)
+			if last_outcome = Outcome_printed and then not (create {RAW_FILE}.make_with_name (a_out_path)).exists then
+				set_outcome (Outcome_failed, {STRING_32} "The printer " + a_printer.to_string_32 + " wrote no file at " + a_out_path.to_string_32 + ".")
+			end
+		ensure
+			printed_or_failed: last_outcome = Outcome_printed or last_outcome = Outcome_failed
+			written_when_printed: last_outcome = Outcome_printed implies (create {RAW_FILE}.make_with_name (a_out_path)).exists
+		end
+
+feature -- The helper
+
+	helper_path: detachable STRING_32
+			-- pdftocairo.exe, found the way SIMPLE_PDF_READER finds pdftotext.exe: bin/ under the
+			-- working folder, the working folder, Poppler's usual install folders; Void when absent.
+		local
+			l_cwd: STRING_32
+		once ("OBJECT")
+			l_cwd := (create {EXECUTION_ENVIRONMENT}).current_working_path.name.to_string_32
+			across
+				<<l_cwd + {STRING_32} "\bin\pdftocairo.exe", l_cwd + {STRING_32} "\pdftocairo.exe",
+					{STRING_32} "C:\Program Files\poppler\bin\pdftocairo.exe",
+					{STRING_32} "C:\Program Files (x86)\poppler\bin\pdftocairo.exe">> as ic
+			until
+				Result /= Void
+			loop
+				if (create {RAW_FILE}.make_with_name (ic)).exists then
+					Result := ic
+				end
+			end
+		end
+
+	quoted (a_argument: READABLE_STRING_GENERAL): STRING_32
+			-- `a_argument' as one argument by the Windows rules (CommandLineToArgvW and the C
+			-- runtime, which SIMPLE_PROCESS's POSIX side follows too): in double quotes; a double
+			-- quote escaped with a backslash; backslashes doubled where a double quote follows.
+		local
+			l_text: STRING_32
+			i, k, l_slashes: INTEGER
+		do
+			l_text := a_argument.to_string_32
+			create Result.make (l_text.count + 2)
+			Result.append_character ('"')
+			from i := 1 until i > l_text.count loop
+				if l_text [i] = '\' then
+					l_slashes := l_slashes + 1
+					Result.append_character ('\')
+				elseif l_text [i] = '"' then
+					from k := 1 until k > l_slashes loop
+						Result.append_character ('\')
+						k := k + 1
+					end
+					Result.append_character ('\')
+					Result.append_character ('"')
+					l_slashes := 0
+				else
+					l_slashes := 0
+					Result.append_character (l_text [i])
+				end
+				i := i + 1
+			end
+			from k := 1 until k > l_slashes loop
+				Result.append_character ('\')
+				k := k + 1
+			end
+			Result.append_character ('"')
+		ensure
+			quoted_both_ends: Result.count >= 2 and Result [1] = '"' and Result [Result.count] = '"'
+		end
+
+	Helper_timeout_ms: INTEGER = 300_000
+			-- How long one print run may take before it is stopped (five minutes).
+
+	File_printer: STRING_32 = "Microsoft Print to PDF"
+			-- The printer the test seam prints to.
+
+	Missing_helper: STRING_32 = "pdftocairo.exe was not found (simple_pdf's bin\ beside the program, or Poppler's install folder)."
+
+feature {NONE} -- Running the helper
+
+	run_helper (a_args: LIST [STRING_32]; a_folder: detachable STRING_32)
+			-- Run pdftocairo with `a_args' in `a_folder' (Void: the current one); its exit code
+			-- sets the outcome: 0 printed, 99 failed, anything else or a timeout failed.
+		local
+			l_process: SIMPLE_PIPED_PROCESS
+			l_command, l_text: STRING_32
+		do
+			if attached helper_path as al_exe then
+				l_command := quoted (al_exe)
+				across a_args as ic loop
+					l_command.append_character (' ')
+					l_command.append (quoted (ic))
+				end
+				create l_process.make
+				l_process.start_in_directory (l_command, a_folder)
+				if not l_process.is_started then
+					if attached l_process.last_error as al_why then
+						set_outcome (Outcome_failed, {STRING_32} "pdftocairo could not start: " + al_why)
+					else
+						set_outcome (Outcome_failed, {STRING_32} "pdftocairo could not start.")
+					end
+				else
+					if l_process.is_input_open then
+						l_process.close_input
+					end
+					l_process.await_output_end (Helper_timeout_ms)
+					l_process.wait_for_exit (Helper_timeout_ms)
+					if not l_process.has_exited then
+						l_process.kill
+						set_outcome (Outcome_failed, {STRING_32} "pdftocairo timed out after " + (Helper_timeout_ms // 1000).out + " seconds.")
+					else
+						l_text := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (l_process.pending_output)
+						l_text.adjust
+						if l_process.exit_code = 0 then
+							set_outcome (Outcome_printed, "")
+						elseif l_text.is_empty then
+							set_outcome (Outcome_failed, {STRING_32} "pdftocairo failed (exit " + l_process.exit_code.out + ").")
+						elseif l_process.exit_code = 99 then
+							set_outcome (Outcome_failed, l_text)
+						else
+							set_outcome (Outcome_failed, {STRING_32} "pdftocairo exit " + l_process.exit_code.out + ": " + l_text)
+						end
+					end
+					l_process.close
+				end
+			else
+				set_outcome (Outcome_failed, Missing_helper)
+			end
+		end
+
+	dialog_arguments (a_dialog: SHELL_PRINT_DIALOG): ARRAYED_LIST [STRING_32]
+			-- pdftocairo's arguments for what `a_dialog' chose (the file name follows).
+		local
+			l_options: STRING_32
+		do
+			create Result.make (10)
+			Result.extend ({STRING_32} "-print")
+			Result.extend ({STRING_32} "-printer")
+			Result.extend (a_dialog.printer_name)
+			Result.extend ({STRING_32} "-origpagesizes")
+			if not a_dialog.is_all_pages then
+				Result.extend ({STRING_32} "-f")
+				Result.extend (a_dialog.first_page.out)
+				Result.extend ({STRING_32} "-l")
+				Result.extend (a_dialog.last_page.out)
+			end
+			create l_options.make_empty
+			inspect a_dialog.duplex
+			when {SHELL_PRINT_DIALOG}.Duplex_off then
+				l_options.append ({STRING_32} "duplex=off")
+			when {SHELL_PRINT_DIALOG}.Duplex_long_edge then
+				l_options.append ({STRING_32} "duplex=long")
+			when {SHELL_PRINT_DIALOG}.Duplex_short_edge then
+				l_options.append ({STRING_32} "duplex=short")
+			else
+			end
+			if attached source_name (a_dialog.paper_source) as al_source then
+				if not l_options.is_empty then
+					l_options.append_character (',')
+				end
+				l_options.append ({STRING_32} "source=" + al_source)
+			end
+			if not l_options.is_empty then
+				Result.extend ({STRING_32} "-printopt")
+				Result.extend (l_options)
+			end
+		end
+
+	source_name (a_bin: INTEGER): detachable STRING_32
+			-- pdftocairo's name for paper source `a_bin' (a DMBIN_ value); Void for a driver's own.
+		do
+			inspect a_bin
+			when 1 then Result := "upper"
+			when 2 then Result := "lower"
+			when 3 then Result := "middle"
+			when 4 then Result := "manual"
+			when 5 then Result := "envelope"
+			when 6 then Result := "envmanual"
+			when 7 then Result := "auto"
+			when 8 then Result := "tractor"
+			when 9 then Result := "smallfmt"
+			when 10 then Result := "largefmt"
+			when 11 then Result := "largecapacity"
+			when 15 then Result := "formsource"
+			else
+			end
+		end
+
+feature {NONE} -- Files
+
+	new_temp_folder: STRING_32
+			-- A new, empty folder under the temporary files folder.
+		local
+			l_base: STRING_32
+			l_dir: DIRECTORY
+			n: INTEGER
+		do
+			if attached (create {EXECUTION_ENVIRONMENT}).item ("TEMP") as al_t then
+				l_base := al_t
+			else
+				l_base := "."
+			end
+			from
+				n := 1
+				Result := l_base + {STRING_32} "\simple_pdf_print_" + n.out
+			until
+				not (create {DIRECTORY}.make (Result)).exists
+			loop
+				n := n + 1
+				Result := l_base + {STRING_32} "\simple_pdf_print_" + n.out
+			end
+			create l_dir.make (Result)
+			l_dir.create_dir
+		end
+
+	file_name_for (a_title: READABLE_STRING_GENERAL): STRING_32
+			-- `a_title' as a file name ending in .pdf: characters a file name cannot hold become
+			-- "_", and at most 100 characters are kept.
+		local
+			c: CHARACTER_32
+			i: INTEGER
+			l_title: STRING_32
+		do
+			l_title := a_title.to_string_32
+			create Result.make (l_title.count.min (100) + 4)
+			from i := 1 until i > l_title.count or Result.count >= 100 loop
+				c := l_title [i]
+				if c.code < 32 or else (c.is_character_8 and then ("<>:%"/\|?*").has (c.to_character_8)) then
+					Result.append_character ('_')
+				else
+					Result.append_character (c)
+				end
+				i := i + 1
+			end
+			Result.adjust
+			if Result.is_empty then
+				Result := "Document"
+			end
+			Result.append ({STRING_32} ".pdf")
+		ensure
+			a_pdf: Result.ends_with ({STRING_32} ".pdf")
+		end
+
+	copy_file (a_from, a_to: READABLE_STRING_GENERAL): BOOLEAN
+			-- Copy the file at `a_from' to `a_to'; did it work?
+		local
+			l_in, l_out: RAW_FILE
+			l_retried: BOOLEAN
+		do
+			if not l_retried then
+				create l_in.make_open_read (a_from)
+				create l_out.make_open_write (a_to)
+				if l_in.count > 0 then
+					l_in.read_stream (l_in.count)
+					l_out.put_string (l_in.last_string)
+				end
+				l_in.close
+				l_out.close
+				Result := True
+			end
+		rescue
+			l_retried := True
+			retry
+		end
+
+	delete_file (a_path: READABLE_STRING_GENERAL)
+			-- Remove the file at `a_path' if there is one.
+		local
+			l_file: RAW_FILE
+		do
+			create l_file.make_with_name (a_path)
+			if l_file.exists then
+				l_file.delete
+			end
+		end
+
+	delete_folder (a_path: READABLE_STRING_GENERAL)
+			-- Remove the folder at `a_path' if it is there and empty.
+		local
+			l_dir: DIRECTORY
+		do
+			create l_dir.make (a_path)
+			if l_dir.exists and then l_dir.is_empty then
+				l_dir.delete
+			end
+		end
+
+	utf_8 (a_text: READABLE_STRING_GENERAL): STRING_8
+			-- `a_text' in UTF-8.
+		do
+			Result := {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (a_text.to_string_32)
+		end
+
+feature {NONE} -- Windows
+
+	locale_paper: INTEGER
+			-- The user's locale paper size (LOCALE_IPAPERSIZE): 1 Letter, 5 Legal, 8 A3, 9 A4.
+		external "C inline use <windows.h>"
+		alias "[
+			DWORD l_value = 0;
+			if (GetLocaleInfoW (LOCALE_USER_DEFAULT, LOCALE_IPAPERSIZE | LOCALE_RETURN_NUMBER, (LPWSTR) &l_value, sizeof (l_value) / sizeof (WCHAR)) == 0) return 0;
+			return (EIF_INTEGER) l_value;
+		]"
+		end
+
+	Locale_legal: INTEGER = 5
+	Locale_a3: INTEGER = 8
+	Locale_a4: INTEGER = 9
+
+end
