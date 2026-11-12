@@ -111,6 +111,46 @@ int spp_print_file(const char *a_path, const char *a_title, void *a_parent)
 	return s_print_result;
 }
 
+/* --------------------------------------------------------------- print preview's parts */
+
+static PDFDocument *spp_quiet_document(const char *a_path)
+{
+	return [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:spp_string(a_path)]];
+}
+
+int spp_pdf_page_count(const char *a_path)
+{
+	PDFDocument *d = spp_quiet_document(a_path);
+	return d ? (int)[d pageCount] : 0;
+}
+
+void spp_page_size(const char *a_path, int a_page, double *a_width, double *a_height)
+{
+	*a_width = 0; *a_height = 0;
+	PDFDocument *d = spp_quiet_document(a_path);
+	if (!d || a_page < 1 || a_page > (int)[d pageCount]) return;
+	NSRect r = [[d pageAtIndex:(NSUInteger)a_page - 1] boundsForBox:kPDFDisplayBoxMediaBox];
+	*a_width = NSWidth(r); *a_height = NSHeight(r);
+}
+
+int spp_page_png(const char *a_path, int a_page, double a_scale, const char *an_out_png)
+{
+	PDFDocument *d = spp_quiet_document(a_path);
+	if (!d || a_page < 1 || a_page > (int)[d pageCount] || a_scale <= 0) return 0;
+	PDFPage *p = [d pageAtIndex:(NSUInteger)a_page - 1];
+	NSRect r = [p boundsForBox:kPDFDisplayBoxMediaBox];
+	NSInteger w = MAX((NSInteger)lround(NSWidth(r) * a_scale), 1), h = MAX((NSInteger)lround(NSHeight(r) * a_scale), 1);
+	NSBitmapImageRep *b = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:w pixelsHigh:h bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace bytesPerRow:0 bitsPerPixel:0];
+	if (!b) return 0;
+	CGContextRef cg = [[NSGraphicsContext graphicsContextWithBitmapImageRep:b] CGContext];
+	CGContextSetRGBFillColor(cg, 1, 1, 1, 1);
+	CGContextFillRect(cg, CGRectMake(0, 0, w, h));
+	CGContextScaleCTM(cg, (CGFloat)w / NSWidth(r), (CGFloat)h / NSHeight(r));
+	[p drawWithBox:kPDFDisplayBoxMediaBox toContext:cg];
+	NSData *l_png = [b representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+	return l_png && [l_png writeToFile:spp_string(an_out_png) atomically:YES] ? 1 : 0;
+}
+
 /* ---------------------------------------------------------------- for the tests only */
 
 int spp_test_page_count(const char *a_path)
