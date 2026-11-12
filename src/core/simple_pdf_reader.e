@@ -329,6 +329,17 @@ feature {NONE} -- Implementation
 				l_candidates.extend ("pdftotext.exe")
 				l_candidates.extend ("C:/Program Files/poppler/bin/pdftotext.exe")
 				l_candidates.extend ("C:/Program Files (x86)/poppler/bin/pdftotext.exe")
+					-- where pdftocairo is found too (PDF_PRINT_PLATFORM.helper_path): beside the
+					-- program, its bin\, then simple_pdf's bin\ under SIMPLE_EIFFEL (development)
+				if attached (create {PATH}.make_from_string ((create {ARGUMENTS_32}).command_name)).parent as al_dir
+					and then al_dir.name.is_valid_as_string_8
+				then
+					l_candidates.extend (al_dir.name.to_string_8 + "\pdftotext.exe")
+					l_candidates.extend (al_dir.name.to_string_8 + "\bin\pdftotext.exe")
+				end
+				if attached l_env.item ("SIMPLE_EIFFEL") as al_root and then al_root.is_valid_as_string_8 then
+					l_candidates.extend (al_root.to_string_8 + "\simple_pdf\bin\pdftotext.exe")
+				end
 			else
 				-- Linux/macOS locations
 				l_candidates.extend ("/usr/bin/pdftotext")
@@ -348,7 +359,8 @@ feature {NONE} -- Implementation
 				create l_file.make_with_name (l_path)
 				if l_file.exists then
 					-- Convert to absolute path for reliability
-					if l_path.starts_with ("C:") or l_path.starts_with ("/") then
+						-- absolute: a drive letter on Windows, a leading slash elsewhere
+					if l_path.starts_with ("/") or else (l_path.count >= 2 and then l_path [2] = ':') then
 						executable_path := l_path
 					else
 						executable_path := l_cwd + "/" + l_path
