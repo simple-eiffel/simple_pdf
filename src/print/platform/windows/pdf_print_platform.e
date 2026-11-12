@@ -168,19 +168,31 @@ feature -- Printing
 feature -- The helper
 
 	helper_path: detachable STRING_32
-			-- pdftocairo.exe, found the way SIMPLE_PDF_READER finds pdftotext.exe: bin/ under the
-			-- working folder, the working folder, Poppler's usual install folders; Void when absent.
+			-- pdftocairo.exe: bin\ under the working folder or the working folder (as SIMPLE_PDF_READER
+			-- finds pdftotext.exe), then the program's own folder and its bin\ (how a program ships it),
+			-- then simple_pdf's bin\ under SIMPLE_EIFFEL (development), then Poppler's install folders;
+			-- Void when absent.
 		local
-			l_cwd: STRING_32
+			l_env: EXECUTION_ENVIRONMENT
+			l_cwd, l_exe_dir: STRING_32
+			l_candidates: ARRAYED_LIST [STRING_32]
 		once ("OBJECT")
-			l_cwd := (create {EXECUTION_ENVIRONMENT}).current_working_path.name.to_string_32
-			across
-				<<l_cwd + {STRING_32} "\bin\pdftocairo.exe", l_cwd + {STRING_32} "\pdftocairo.exe",
-					{STRING_32} "C:\Program Files\poppler\bin\pdftocairo.exe",
-					{STRING_32} "C:\Program Files (x86)\poppler\bin\pdftocairo.exe">> as ic
-			until
-				Result /= Void
-			loop
+			create l_env
+			l_cwd := l_env.current_working_path.name.to_string_32
+			create l_candidates.make (8)
+			l_candidates.extend (l_cwd + {STRING_32} "\bin\pdftocairo.exe")
+			l_candidates.extend (l_cwd + {STRING_32} "\pdftocairo.exe")
+			if attached (create {PATH}.make_from_string ((create {ARGUMENTS_32}).command_name)).parent as al_dir then
+				l_exe_dir := al_dir.name.to_string_32
+				l_candidates.extend (l_exe_dir + {STRING_32} "\pdftocairo.exe")
+				l_candidates.extend (l_exe_dir + {STRING_32} "\bin\pdftocairo.exe")
+			end
+			if attached l_env.item ("SIMPLE_EIFFEL") as al_root then
+				l_candidates.extend (al_root + {STRING_32} "\simple_pdf\bin\pdftocairo.exe")
+			end
+			l_candidates.extend ({STRING_32} "C:\Program Files\poppler\bin\pdftocairo.exe")
+			l_candidates.extend ({STRING_32} "C:\Program Files (x86)\poppler\bin\pdftocairo.exe")
+			across l_candidates as ic until Result /= Void loop
 				if (create {RAW_FILE}.make_with_name (ic)).exists then
 					Result := ic
 				end
