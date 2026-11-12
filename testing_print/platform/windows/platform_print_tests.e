@@ -19,6 +19,9 @@ feature -- Running
 			a_run.call (agent test_a_hostile_printer_name_reaches_the_helper_intact, "a_hostile_printer_name_reaches_the_helper_intact")
 			a_run.call (agent test_has_printer_matches_the_system_list, "has_printer_matches_the_system_list")
 			a_run.call (agent test_copies_collated_and_not, "copies_collated_and_not")
+			a_run.call (agent test_a_file_printer_asks_us_and_never_hangs, "a_file_printer_asks_us_and_never_hangs")
+			a_run.call (agent test_a_helper_dies_with_the_program, "a_helper_dies_with_the_program")
+			a_run.call (agent test_the_print_wait_is_modal, "the_print_wait_is_modal")
 		end
 
 feature -- Tests
@@ -39,9 +42,82 @@ feature -- Tests
 			create l_printer.make
 			l_printer.print_file_to_printer (l_in, l_name, temp_path ("simple_pdf_print_name_out.pdf"))
 			assert ("failed", l_printer.last_outcome = l_printer.Outcome_failed)
-			assert ("the name came through intact: " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_printer.last_error),
-				l_printer.last_error.has_substring (l_name))
+			assert ("the name came through intact: " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_printer.last_error_detail),
+				l_printer.last_error_detail.has_substring (l_name))
+			assert ("the person reads a sentence, not the helper", not l_printer.last_error.has_substring ("pdftocairo"))
 			delete_if_there (l_in)
+		end
+
+	test_a_file_printer_asks_us_and_never_hangs
+			-- 2026-11-11 (Larry's copy hung): a printer that writes a file (Microsoft Print to PDF)
+			-- is asked where by us, not by its own prompt, which stood unseen while the program
+			-- waited. The tests answer the question; the job finishes in seconds and writes there.
+		local
+			l_printer: SIMPLE_PDF_PRINTER
+			l_in, l_out: STRING
+			l_started: DATE_TIME
+		do
+			create l_printer.make
+			assert ("Microsoft Print to PDF writes files", l_printer.printer_writes_files ("Microsoft Print to PDF"))
+			l_in := temp_path ("simple_pdf_file_printer_in.pdf")
+			l_out := temp_path ("simple_pdf_file_printer_out.pdf")
+			delete_if_there (l_out)
+			write_two_pages (l_in)
+			l_printer.set_test_file_answer (l_out)
+			create l_started.make_now
+			l_printer.print_chosen (l_in, "File printer test", default_pointer, "Microsoft Print to PDF", True, 1, 2, 2, 1, True, 0, 0)
+			l_printer.set_test_file_answer (Void)
+			assert ("printed: " + l_printer.last_outcome.out + " " + {UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_printer.last_error_detail),
+				l_printer.last_outcome = l_printer.Outcome_printed)
+			assert ("in seconds, not after a timeout", (create {DATE_TIME}.make_now).relative_duration (l_started).seconds_count < 120)
+			assert ("written where we said", (create {RAW_FILE}.make_with_name (l_out)).exists)
+			delete_if_there (l_in)
+			delete_if_there (l_out)
+		end
+
+	test_a_helper_dies_with_the_program
+			-- A print helper is started the way `run_helper' starts it and joins this program's
+			-- kill-on-close job (simple_process's `ends_with_owner'), so a killed program never
+			-- leaves one waiting on a prompt (Larry's force-close left pdftocairo behind).
+		local
+			l_printer: SIMPLE_PDF_PRINTER
+			l_child: SIMPLE_PIPED_PROCESS
+		do
+			create l_printer.make
+			l_child := l_printer.new_helper_process
+			l_child.start_in_directory ("ping -n 3 127.0.0.1", Void)
+			assert ("a child started", l_child.is_started)
+			assert ("in a kill-on-close job", l_printer.is_in_job (l_child.process_id))
+			l_child.wait_for_exit (10000)
+			l_child.close
+		end
+
+	test_the_print_wait_is_modal
+			-- While the print helper runs, our windows are disabled: a click posted to one is
+			-- dropped, a close request is held and handed back once the helper ends, and the
+			-- window is enabled again (EIF-GROUP, 2026-11-11). The window is off every screen.
+		local
+			l_printer: SIMPLE_PDF_PRINTER
+			l_child: SIMPLE_PIPED_PROCESS
+			l_window: POINTER
+		do
+			create l_printer.make
+			l_window := c_test_window
+			assert ("a test window", l_window /= default_pointer)
+			c_test_post_click_and_close (l_window)
+			l_child := l_printer.new_helper_process
+			l_child.start_in_directory ("ping -n 2 127.0.0.1", Void)
+			assert ("a child started", l_child.is_started)
+			l_printer.modal_wait (l_child, 20_000)
+			assert ("the child ended", l_child.has_exited)
+			l_child.close
+			assert ("enabled again", c_test_enabled (l_window) = 1)
+			assert ("the click was dropped", c_test_clicks (l_window) = 0)
+			assert ("the close was held, not handled during the wait", c_test_closes (l_window) = 0)
+			c_test_drain
+			assert ("the close was handed back after", c_test_closes (l_window) = 1)
+			assert ("still no click", c_test_clicks (l_window) = 0)
+			c_test_destroy (l_window)
 		end
 
 	test_copies_collated_and_not
@@ -90,6 +166,44 @@ feature -- Tests
 			create l_printer.make
 			create l_list.make
 			assert ("has_printer agrees with the system's list", l_printer.has_printer = not l_list.printer_names.is_empty)
+		end
+
+
+feature {NONE} -- Test windows
+
+	c_test_window: POINTER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return (EIF_POINTER) spp_test_window ();"
+		end
+
+	c_test_post_click_and_close (a_window: POINTER)
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "spp_test_post_click_and_close ((HWND) $a_window);"
+		end
+
+	c_test_clicks (a_window: POINTER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_test_clicks ((HWND) $a_window);"
+		end
+
+	c_test_closes (a_window: POINTER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_test_closes ((HWND) $a_window);"
+		end
+
+	c_test_enabled (a_window: POINTER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_test_enabled ((HWND) $a_window);"
+		end
+
+	c_test_drain
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "spp_test_drain ();"
+		end
+
+	c_test_destroy (a_window: POINTER)
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "DestroyWindow ((HWND) $a_window);"
 		end
 
 end

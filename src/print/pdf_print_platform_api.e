@@ -53,6 +53,13 @@ feature -- Access
 			create Result.make_empty
 		end
 
+	last_error_detail: STRING_32
+			-- For the program's log, not the person: the helper's own words (exit code, messages)
+			-- behind `last_error'; may be empty.
+		attribute
+			create Result.make_empty
+		end
+
 feature -- Status
 
 	has_printer: BOOLEAN
@@ -153,9 +160,18 @@ feature {NONE} -- Outcome
 		do
 			last_outcome := a_outcome
 			create last_error.make_from_string_general (a_error)
+			create last_error_detail.make_empty
 		ensure
 			outcome_set: last_outcome = a_outcome
 			error_set: last_error.same_string_general (a_error)
+		end
+
+	set_detail (a_detail: READABLE_STRING_GENERAL)
+			-- Record `a_detail' behind the last failure.
+		do
+			create last_error_detail.make_from_string_general (a_detail)
+		ensure
+			set: last_error_detail.same_string_general (a_detail)
 		end
 
 invariant

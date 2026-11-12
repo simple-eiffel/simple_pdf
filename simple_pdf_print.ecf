@@ -26,6 +26,12 @@
 				<platform value="unix"/>
 			</condition>
 		</external_linker_flag>
+		<!-- Windows: the printer's port, the modal wait, the helper's lifetime -->
+		<external_include location="$(SIMPLE_EIFFEL)/simple_pdf/Clib/windows">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</external_include>
 		<!-- Linux: header-only C over the system's gtk4 and poppler-glib -->
 		<external_include location="$(SIMPLE_EIFFEL)/simple_pdf/Clib/linux">
 			<condition>
@@ -88,6 +94,7 @@
 		<setting name="console_application" value="true"/>
 		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
 		<cluster name="print_tests" location=".\testing_print\">
 			<file_rule>
 				<exclude>/platform$</exclude>
