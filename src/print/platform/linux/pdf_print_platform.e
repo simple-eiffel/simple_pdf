@@ -68,6 +68,32 @@ feature -- Printing
 			end
 		end
 
+feature -- Pages, for a print preview
+
+	pdf_page_count (a_pdf_path: READABLE_STRING_GENERAL): INTEGER
+			-- How many pages (Poppler's pdftotext).
+		do
+			Result := pages.page_count (a_pdf_path)
+		end
+
+	page_size (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER): TUPLE [width, height: REAL_64]
+			-- Page `a_page''s size in points (Poppler's pdftocairo).
+		do
+			Result := pages.page_size (a_pdf_path, a_page)
+		end
+
+	page_image (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER; a_scale: REAL_64): detachable CAIRO_SURFACE
+			-- Page `a_page' drawn by Poppler's pdftocairo.
+		do
+			Result := pages.page_image (a_pdf_path, a_page, a_scale)
+		end
+
+	pages: PDF_POPPLER_PAGES
+			-- The pages drawn by the system's pdftocairo (poppler-utils).
+		once ("OBJECT")
+			create Result.make ({STRING_32} "/usr/bin/pdftocairo")
+		end
+
 feature {NONE} -- Implementation
 
 	run (a_pdf_path, a_title: READABLE_STRING_GENERAL; a_parent: POINTER; a_out: READABLE_STRING_GENERAL)

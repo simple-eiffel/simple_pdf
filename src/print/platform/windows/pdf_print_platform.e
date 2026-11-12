@@ -272,6 +272,32 @@ feature -- The runs a choice makes
 			uncollated_count: not (a_collated or a_copies = 1 or (not a_ranged and a_last = 0)) implies Result.count = a_copies * (a_last - a_first + 1)
 		end
 
+feature -- Pages, for a print preview
+
+	pdf_page_count (a_pdf_path: READABLE_STRING_GENERAL): INTEGER
+			-- How many pages (Poppler's pdftotext).
+		do
+			Result := pages.page_count (a_pdf_path)
+		end
+
+	page_size (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER): TUPLE [width, height: REAL_64]
+			-- Page `a_page''s size in points (Poppler's pdftocairo).
+		do
+			Result := pages.page_size (a_pdf_path, a_page)
+		end
+
+	page_image (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER; a_scale: REAL_64): detachable CAIRO_SURFACE
+			-- Page `a_page' drawn by Poppler's pdftocairo.
+		do
+			Result := pages.page_image (a_pdf_path, a_page, a_scale)
+		end
+
+	pages: PDF_POPPLER_PAGES
+			-- The pages drawn by the pdftocairo.exe beside the program (`helper_path').
+		once ("OBJECT")
+			create Result.make (if attached helper_path as al_path then al_path else {STRING_32} "pdftocairo.exe" end)
+		end
+
 feature {NONE} -- Running the helper
 
 	run_arguments (a_printer: READABLE_STRING_GENERAL; a_duplex, a_source: INTEGER; a_ranged: BOOLEAN;
