@@ -77,6 +77,33 @@ feature -- Printing to a file
 			delete_if_there (l_out)
 		end
 
+	test_pages_for_a_preview
+			-- A print preview's parts: the page count, a page's size in points, and a page drawn
+			-- as an image at the scale asked (1.0: one pixel to the point), with ink on it.
+		local
+			l_printer: SIMPLE_PDF_PRINTER
+			l_in: STRING
+			l_size: TUPLE [width, height: REAL_64]
+		do
+			l_in := temp_path ("simple_pdf_preview_in.pdf")
+			write_two_pages (l_in)
+			create l_printer.make
+			assert ("two pages: " + l_printer.pdf_page_count (l_in).out, l_printer.pdf_page_count (l_in) = 2)
+			l_size := l_printer.page_size (l_in, 1)
+			assert ("Letter in points: " + l_size.width.out + " x " + l_size.height.out,
+				(l_size.width - 612.0).abs <= 1.0 and (l_size.height - 792.0).abs <= 1.0)
+			if attached l_printer.page_image (l_in, 1, 1.0) as al_image then
+				assert ("the image is the page: " + al_image.width.out + " x " + al_image.height.out,
+					(al_image.width - 612).abs <= 1 and (al_image.height - 792).abs <= 1)
+				al_image.destroy
+			else
+				assert ("page 1 drawn", False)
+			end
+			assert ("page 2 has ink: " + page_ink (l_in, 2).out, page_ink (l_in, 2) > 50)
+			assert ("no page 3", l_printer.page_image (l_in, 3, 1.0) = Void)
+			delete_if_there (l_in)
+		end
+
 	test_a_broken_pdf_fails_with_a_reason
 			-- A file that is not a PDF fails, with a reason, and never raises.
 		local

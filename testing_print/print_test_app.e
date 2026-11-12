@@ -24,6 +24,7 @@ feature {NONE} -- Initialization
 			run_test (agent l_shared.test_default_paper_is_a_real_size, "default_paper_is_a_real_size")
 			run_test (agent l_shared.test_print_file_to_keeps_the_pages_and_their_ink, "print_file_to_keeps_the_pages_and_their_ink")
 			run_test (agent l_shared.test_a_broken_pdf_fails_with_a_reason, "a_broken_pdf_fails_with_a_reason")
+			run_test (agent l_shared.test_pages_for_a_preview, "pages_for_a_preview")
 			create l_platform
 			l_platform.run_all (agent run_test)
 			print ("Results: " + passed.out + " passed, " + failed.out + " failed%N")

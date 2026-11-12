@@ -88,7 +88,7 @@ feature -- Printing
 			if not has_printer then
 				set_outcome (Outcome_no_printer, "")
 			elseif helper_path = Void then
-				set_outcome (Outcome_failed, Missing_helper)
+				fail ("Printing is not set up on this computer.", Missing_helper)
 			else
 				create l_reader.make
 				if l_reader.is_available then
@@ -101,34 +101,160 @@ feature -- Printing
 				elseif l_dialog.last_answer = l_dialog.Answer_failed then
 					set_outcome (Outcome_failed, "The print dialog could not open (error " + l_dialog.last_error_code.out + ").")
 				else
-						-- pdftocairo names the job after its input file: print a copy named after the title
-					l_folder := new_temp_folder
-					l_copy := file_name_for (a_title)
-					if not copy_file (a_pdf_path, l_folder + "\" + l_copy) then
-						set_outcome (Outcome_failed, {STRING_32} "Could not prepare the job in " + l_folder + ".")
-					else
-						if l_dialog.is_all_pages then
-							l_first := 1
-							l_last := l_pages
-						else
-							l_first := l_dialog.first_page
-							l_last := l_dialog.last_page
-						end
-						across
-							job_runs (l_dialog.printer_name, l_first, l_last, l_dialog.copies, l_dialog.is_collated,
-								l_dialog.duplex, l_dialog.paper_source, l_copy, not l_dialog.is_all_pages) as ic
-						until
-							i > 0 and last_outcome /= Outcome_printed
-						loop
-							i := i + 1
-							run_helper (ic, l_folder)
-						end
-					end
-					delete_file (l_folder + "\" + l_copy)
-					delete_folder (l_folder)
+					print_chosen (a_pdf_path, a_title, a_parent, l_dialog.printer_name, l_dialog.is_all_pages, l_dialog.first_page,
+						l_dialog.last_page, l_pages, l_dialog.copies, l_dialog.is_collated, l_dialog.duplex, l_dialog.paper_source)
 				end
 			end
 		end
+
+	print_chosen (a_pdf_path, a_title: READABLE_STRING_GENERAL; a_parent: POINTER; a_printer: READABLE_STRING_GENERAL;
+			a_all_pages: BOOLEAN; a_first, a_last, a_page_count, a_copies: INTEGER; a_collated: BOOLEAN; a_duplex, a_source: INTEGER)
+			-- Print what the dialog chose. A printer that writes a file (Microsoft Print to PDF, the
+			-- XPS writer) is asked where by us, with the system's Save dialog owned by `a_parent', and
+			-- prints one copy there: the printer's own prompt, from the helper, could stand unseen
+			-- behind our windows (Larry's copy hung on it, 2026-11-11).
+		require
+			printer_named: not a_printer.is_empty
+			copies_positive: a_copies >= 1
+		local
+			l_first, l_last: INTEGER
+			l_folder, l_copy: STRING_32
+			l_out: detachable STRING_32
+			l_dialog: SHELL_FILE_DIALOG
+			l_ok: BOOLEAN
+			i: INTEGER
+		do
+			l_ok := True
+			if printer_writes_files (a_printer) then
+				if attached test_file_answer as al_answer then
+					l_out := al_answer
+				else
+					create l_dialog.make
+					l_dialog.choose_save_file (a_parent, a_title, file_printer_filter (a_printer), "", file_name_for (a_title))
+					if l_dialog.has_choice then
+						l_out := l_dialog.chosen_path
+					end
+				end
+				if l_out = Void then
+					set_outcome (Outcome_cancelled, "")
+					l_ok := False
+				end
+			end
+			if l_ok then
+				if a_all_pages then
+					l_first := 1
+					l_last := a_page_count
+				else
+					l_first := a_first
+					l_last := a_last
+				end
+					-- pdftocairo names the job after its input file: print a copy named after the title
+				l_folder := new_temp_folder
+				l_copy := file_name_for (a_title)
+				if not copy_file (a_pdf_path, l_folder + "\" + l_copy) then
+					set_outcome (Outcome_failed, {STRING_32} "Could not prepare the job in " + l_folder + ".")
+				else
+					across
+						job_runs (a_printer, l_first, l_last, if l_out /= Void then 1 else a_copies end, a_collated,
+							a_duplex, a_source, l_copy, not a_all_pages) as ic
+					until
+						i > 0 and last_outcome /= Outcome_printed
+					loop
+						i := i + 1
+						if attached l_out as al_out then
+							ic.extend (al_out)
+						end
+						run_helper (ic, l_folder)
+					end
+				end
+				delete_file (l_folder + "\" + l_copy)
+				delete_folder (l_folder)
+			end
+		end
+
+	printer_writes_files (a_printer: READABLE_STRING_GENERAL): BOOLEAN
+			-- Does `a_printer' write a file and ask where (its port PORTPROMPT: or FILE:)?
+		local
+			l_name: NATIVE_STRING
+			l_port: MANAGED_POINTER
+			l_text: STRING_32
+			i: INTEGER
+		do
+			create l_name.make (a_printer)
+			create l_port.make (512)
+			if c_printer_port (l_name.item, l_port.item, 256) = 1 then
+				create l_text.make (16)
+				from i := 0 until i >= 256 or else l_port.read_natural_16 (i * 2) = 0 loop
+					l_text.append_code (l_port.read_natural_16 (i * 2).to_natural_32)
+					i := i + 1
+				end
+				l_text.to_upper
+				Result := l_text.same_string ({STRING_32} "PORTPROMPT:") or l_text.same_string ({STRING_32} "FILE:")
+			end
+		end
+
+	modal_wait (a_process: SIMPLE_PIPED_PROCESS; a_limit_ms: INTEGER)
+			-- Wait up to `a_limit_ms' for `a_process' to end, as a modal dialog waits: this
+			-- thread's windows disabled, so nothing re-enters (no second Print, no close);
+			-- painting and timers kept up, so no window shows "Not responding"; keyboard and
+			-- mouse dropped; a close request held and handed back after (2026-11-11, EIF-GROUP).
+		require
+			started: a_process.is_started
+			limit_positive: a_limit_ms > 0
+		local
+			l_disabled, l_held: MANAGED_POINTER
+			l_disabled_count, l_held_count, l_waited: INTEGER
+		do
+			create l_disabled.make (Window_capacity * Pointer_bytes)
+			create l_held.make (Held_capacity * c_held_size)
+			l_disabled_count := c_disable_windows (l_disabled.item, Window_capacity)
+			from
+				l_held_count := c_pump_messages (l_held.item, Held_capacity, 0)
+			until
+				a_process.has_exited or l_waited >= a_limit_ms
+			loop
+				a_process.wait_for_exit (Pump_interval_ms)
+				l_held_count := c_pump_messages (l_held.item, Held_capacity, l_held_count)
+				l_waited := l_waited + Pump_interval_ms
+			end
+			c_enable_windows (l_disabled.item, l_disabled_count)
+			c_repost (l_held.item, l_held_count)
+		end
+
+	new_helper_process: SIMPLE_PIPED_PROCESS
+			-- A process to run the print helper in: started the ordinary way, so a driver's own
+			-- prompt (a PIN, paper out) is not started hidden; no console window; and ended with
+			-- this program, however it ends (Larry's force-closed copy left pdftocairo behind).
+		do
+			create Result.make
+			Result.set_show_window (True)
+			Result.set_suppresses_console (True)
+			Result.set_ends_with_owner (True)
+		ensure
+			shown: Result.show_window
+			no_console: Result.suppresses_console
+			ends_with_us: Result.ends_with_owner
+			not_started: not Result.is_started
+		end
+
+	is_in_job (a_pid: NATURAL_32): BOOLEAN
+			-- Is process `a_pid' in a job object?
+		do
+			Result := c_in_job (a_pid) = 1
+		end
+
+	set_test_file_answer (a_path: detachable READABLE_STRING_GENERAL)
+			-- Tests: answer the file printer's "save the printout where?" with `a_path' (Void: ask).
+		do
+			if attached a_path as al_path then
+				create test_file_answer.make_from_string_general (al_path)
+			else
+				test_file_answer := Void
+			end
+		end
+
+	test_file_answer: detachable STRING_32
+			-- The tests' answer to the file printer's question, if set.
 
 	print_file_to (a_pdf_path, a_out_path: READABLE_STRING_GENERAL)
 			-- The test seam: pdftocairo to the Microsoft Print to PDF printer, which writes the job
@@ -168,19 +294,31 @@ feature -- Printing
 feature -- The helper
 
 	helper_path: detachable STRING_32
-			-- pdftocairo.exe, found the way SIMPLE_PDF_READER finds pdftotext.exe: bin/ under the
-			-- working folder, the working folder, Poppler's usual install folders; Void when absent.
+			-- pdftocairo.exe: bin\ under the working folder or the working folder (as SIMPLE_PDF_READER
+			-- finds pdftotext.exe), then the program's own folder and its bin\ (how a program ships it),
+			-- then simple_pdf's bin\ under SIMPLE_EIFFEL (development), then Poppler's install folders;
+			-- Void when absent.
 		local
-			l_cwd: STRING_32
+			l_env: EXECUTION_ENVIRONMENT
+			l_cwd, l_exe_dir: STRING_32
+			l_candidates: ARRAYED_LIST [STRING_32]
 		once ("OBJECT")
-			l_cwd := (create {EXECUTION_ENVIRONMENT}).current_working_path.name.to_string_32
-			across
-				<<l_cwd + {STRING_32} "\bin\pdftocairo.exe", l_cwd + {STRING_32} "\pdftocairo.exe",
-					{STRING_32} "C:\Program Files\poppler\bin\pdftocairo.exe",
-					{STRING_32} "C:\Program Files (x86)\poppler\bin\pdftocairo.exe">> as ic
-			until
-				Result /= Void
-			loop
+			create l_env
+			l_cwd := l_env.current_working_path.name.to_string_32
+			create l_candidates.make (8)
+			l_candidates.extend (l_cwd + {STRING_32} "\bin\pdftocairo.exe")
+			l_candidates.extend (l_cwd + {STRING_32} "\pdftocairo.exe")
+			if attached (create {PATH}.make_from_string ((create {ARGUMENTS_32}).command_name)).parent as al_dir then
+				l_exe_dir := al_dir.name.to_string_32
+				l_candidates.extend (l_exe_dir + {STRING_32} "\pdftocairo.exe")
+				l_candidates.extend (l_exe_dir + {STRING_32} "\bin\pdftocairo.exe")
+			end
+			if attached l_env.item ("SIMPLE_EIFFEL") as al_root then
+				l_candidates.extend (al_root + {STRING_32} "\simple_pdf\bin\pdftocairo.exe")
+			end
+			l_candidates.extend ({STRING_32} "C:\Program Files\poppler\bin\pdftocairo.exe")
+			l_candidates.extend ({STRING_32} "C:\Program Files (x86)\poppler\bin\pdftocairo.exe")
+			across l_candidates as ic until Result /= Void loop
 				if (create {RAW_FILE}.make_with_name (ic)).exists then
 					Result := ic
 				end
@@ -225,8 +363,22 @@ feature -- The helper
 			quoted_both_ends: Result.count >= 2 and Result [1] = '"' and Result [Result.count] = '"'
 		end
 
-	Helper_timeout_ms: INTEGER = 300_000
-			-- How long one print run may take before it is stopped (five minutes).
+	Helper_timeout_ms: INTEGER = 3_600_000
+			-- How long one print run may take before it is stopped: an hour. pdftocairo reports no
+			-- progress to watch, so this bounds only a run that never ends (a printer waiting on an
+			-- answer no one can give); a long job on a slow printer stays well inside it.
+
+	Window_capacity: INTEGER = 64
+			-- Windows of ours a print run disables at most.
+
+	Held_capacity: INTEGER = 16
+			-- Close requests a print run holds at most.
+
+	Pump_interval_ms: INTEGER = 50
+			-- How often the wait services the windows.
+
+	Pointer_bytes: INTEGER = 8
+			-- Room for one window handle.
 
 	File_printer: STRING_32 = "Microsoft Print to PDF"
 			-- The printer the test seam prints to.
@@ -270,6 +422,32 @@ feature -- The runs a choice makes
 		ensure
 			collated_count: (a_collated or a_copies = 1 or (not a_ranged and a_last = 0)) implies Result.count = a_copies
 			uncollated_count: not (a_collated or a_copies = 1 or (not a_ranged and a_last = 0)) implies Result.count = a_copies * (a_last - a_first + 1)
+		end
+
+feature -- Pages, for a print preview
+
+	pdf_page_count (a_pdf_path: READABLE_STRING_GENERAL): INTEGER
+			-- How many pages (Poppler's pdftotext).
+		do
+			Result := pages.page_count (a_pdf_path)
+		end
+
+	page_size (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER): TUPLE [width, height: REAL_64]
+			-- Page `a_page''s size in points (Poppler's pdftocairo).
+		do
+			Result := pages.page_size (a_pdf_path, a_page)
+		end
+
+	page_image (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER; a_scale: REAL_64): detachable CAIRO_SURFACE
+			-- Page `a_page' drawn by Poppler's pdftocairo.
+		do
+			Result := pages.page_image (a_pdf_path, a_page, a_scale)
+		end
+
+	pages: PDF_POPPLER_PAGES
+			-- The pages drawn by the pdftocairo.exe beside the program (`helper_path').
+		once ("OBJECT")
+			create Result.make (if attached helper_path as al_path then al_path else {STRING_32} "pdftocairo.exe" end)
 		end
 
 feature {NONE} -- Running the helper
@@ -328,40 +506,70 @@ feature {NONE} -- Running the helper
 					l_command.append_character (' ')
 					l_command.append (quoted (ic))
 				end
-				create l_process.make
+				l_process := new_helper_process
 				l_process.start_in_directory (l_command, a_folder)
 				if not l_process.is_started then
 					if attached l_process.last_error as al_why then
-						set_outcome (Outcome_failed, {STRING_32} "pdftocairo could not start: " + al_why)
+						fail ("Printing could not start.", {STRING_32} "pdftocairo did not start: " + al_why)
 					else
-						set_outcome (Outcome_failed, {STRING_32} "pdftocairo could not start.")
+						fail ("Printing could not start.", "pdftocairo did not start.")
 					end
 				else
 					if l_process.is_input_open then
 						l_process.close_input
 					end
-					l_process.await_output_end (Helper_timeout_ms)
-					l_process.wait_for_exit (Helper_timeout_ms)
+					modal_wait (l_process, Helper_timeout_ms)
+					if l_process.has_exited then
+						l_process.await_output_end (2000)
+					end
 					if not l_process.has_exited then
 						l_process.kill
-						set_outcome (Outcome_failed, {STRING_32} "pdftocairo timed out after " + (Helper_timeout_ms // 1000).out + " seconds.")
+						fail ("The printer did not answer within an hour, so the job was stopped.",
+							{STRING_32} "pdftocairo timed out after " + (Helper_timeout_ms // 1000).out + " seconds.")
 					else
 						l_text := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (l_process.pending_output)
 						l_text.adjust
 						if l_process.exit_code = 0 then
 							set_outcome (Outcome_printed, "")
-						elseif l_text.is_empty then
-							set_outcome (Outcome_failed, {STRING_32} "pdftocairo failed (exit " + l_process.exit_code.out + ").")
-						elseif l_process.exit_code = 99 then
-							set_outcome (Outcome_failed, l_text)
 						else
-							set_outcome (Outcome_failed, {STRING_32} "pdftocairo exit " + l_process.exit_code.out + ": " + l_text)
+								-- pdftocairo's exit codes: 1 the PDF could not be opened, 2 the output
+								-- file could not be written, 3 printing is not permitted, 99 other
+							inspect l_process.exit_code
+							when 1 then
+								fail ("The document could not be read for printing.", helper_detail (l_process.exit_code, l_text))
+							when 2 then
+								fail ("The printout could not be written.", helper_detail (l_process.exit_code, l_text))
+							when 3 then
+								fail ("The document does not allow printing.", helper_detail (l_process.exit_code, l_text))
+							else
+								fail ("The printer did not finish the job.", helper_detail (l_process.exit_code, l_text))
+							end
 						end
 					end
 					l_process.close
 				end
 			else
-				set_outcome (Outcome_failed, Missing_helper)
+				fail ("Printing is not set up on this computer.", Missing_helper)
+			end
+		end
+
+	fail (a_message, a_detail: READABLE_STRING_GENERAL)
+			-- Failed: `a_message' for the person (`last_error'), `a_detail' for us (`last_error_detail').
+		require
+			message_present: not a_message.is_empty
+		do
+			set_outcome (Outcome_failed, a_message)
+			set_detail (a_detail)
+		ensure
+			failed: last_outcome = Outcome_failed
+		end
+
+	helper_detail (a_code: INTEGER; a_text: READABLE_STRING_32): STRING_32
+			-- pdftocairo's exit code and what it wrote.
+		do
+			Result := {STRING_32} "pdftocairo exit " + a_code.out
+			if not a_text.is_empty then
+				Result.append ({STRING_32} ": " + a_text)
 			end
 		end
 
@@ -386,6 +594,16 @@ feature {NONE} -- Running the helper
 		end
 
 feature {NONE} -- Files
+
+	file_printer_filter (a_printer: READABLE_STRING_GENERAL): STRING_32
+			-- What a file printer writes: XPS for an XPS writer, else PDF.
+		do
+			if a_printer.as_string_32.as_upper.has_substring ({STRING_32} "XPS") then
+				Result := {STRING_32} "XPS documents|*.oxps;*.xps"
+			else
+				Result := {STRING_32} "PDF files|*.pdf"
+			end
+		end
 
 	new_temp_folder: STRING_32
 			-- A new, empty folder under the temporary files folder.
@@ -491,6 +709,41 @@ feature {NONE} -- Files
 		end
 
 feature {NONE} -- Windows
+
+	c_printer_port (a_name, a_out: POINTER; a_cap: INTEGER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_printer_port ((const wchar_t *) $a_name, (wchar_t *) $a_out, $a_cap);"
+		end
+
+	c_in_job (a_pid: NATURAL_32): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_in_job ((DWORD) $a_pid);"
+		end
+
+	c_pump_messages (a_held: POINTER; a_cap, a_count: INTEGER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_pump_messages ((SPP_HELD *) $a_held, $a_cap, $a_count);"
+		end
+
+	c_repost (a_held: POINTER; a_count: INTEGER)
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "spp_repost ((SPP_HELD *) $a_held, $a_count);"
+		end
+
+	c_held_size: INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return (EIF_INTEGER) sizeof (SPP_HELD);"
+		end
+
+	c_disable_windows (a_out: POINTER; a_cap: INTEGER): INTEGER
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "return spp_disable_windows ((HWND *) $a_out, $a_cap);"
+		end
+
+	c_enable_windows (a_list: POINTER; a_count: INTEGER)
+		external "C inline use %"simple_pdf_print_win.h%""
+		alias "spp_enable_windows ((HWND *) $a_list, $a_count);"
+		end
 
 	locale_paper: INTEGER
 			-- The user's locale paper size (LOCALE_IPAPERSIZE): 1 Letter, 5 Legal, 8 A3, 9 A4.

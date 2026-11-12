@@ -53,6 +53,13 @@ feature -- Access
 			create Result.make_empty
 		end
 
+	last_error_detail: STRING_32
+			-- For the program's log, not the person: the helper's own words (exit code, messages)
+			-- behind `last_error'; may be empty.
+		attribute
+			create Result.make_empty
+		end
+
 feature -- Status
 
 	has_printer: BOOLEAN
@@ -110,6 +117,38 @@ feature -- Printing
 			error_only_on_failure: last_outcome = Outcome_printed implies last_error.is_empty
 		end
 
+feature -- Pages, for a print preview
+
+	pdf_page_count (a_pdf_path: READABLE_STRING_GENERAL): INTEGER
+			-- How many pages the PDF at `a_pdf_path' has; 0 when it cannot be read.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+		deferred
+		ensure
+			not_negative: Result >= 0
+		end
+
+	page_size (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER): TUPLE [width, height: REAL_64]
+			-- Page `a_page''s size in points; [0, 0] when it cannot be read.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+			page_from_one: a_page >= 1
+		deferred
+		ensure
+			not_negative: Result.width >= 0.0 and Result.height >= 0.0
+		end
+
+	page_image (a_pdf_path: READABLE_STRING_GENERAL; a_page: INTEGER; a_scale: REAL_64): detachable CAIRO_SURFACE
+			-- Page `a_page' drawn as an image, `a_scale' pixels to the point (1.0: 72 dots per inch),
+			-- on white; Void when it cannot be drawn. The caller owns the surface (`destroy' it).
+			-- Windows and Linux: Poppler (pdftocairo); macOS: PDFKit, the library that prints there.
+		require
+			path_not_empty: not a_pdf_path.is_empty
+			page_from_one: a_page >= 1
+			scale_positive: a_scale > 0.0
+		deferred
+		end
+
 feature {NONE} -- Outcome
 
 	set_outcome (a_outcome: INTEGER; a_error: READABLE_STRING_GENERAL)
@@ -121,9 +160,18 @@ feature {NONE} -- Outcome
 		do
 			last_outcome := a_outcome
 			create last_error.make_from_string_general (a_error)
+			create last_error_detail.make_empty
 		ensure
 			outcome_set: last_outcome = a_outcome
 			error_set: last_error.same_string_general (a_error)
+		end
+
+	set_detail (a_detail: READABLE_STRING_GENERAL)
+			-- Record `a_detail' behind the last failure.
+		do
+			create last_error_detail.make_from_string_general (a_detail)
+		ensure
+			set: last_error_detail.same_string_general (a_detail)
 		end
 
 invariant
