@@ -10,7 +10,7 @@ so their DLLs sit here beside them.
 |---|---|---|
 | cairo.dll | 1.18.0 | simple_cairo |
 | fontconfig-1.dll | 2.14.2 | simple_cairo |
-| freetype.dll | 2.12.1 | simple_cairo |
+| freetype.dll | 2.14.3 | simple_cairo |
 | libexpat.dll | 2.6.3 | simple_cairo |
 | libpng16.dll | 1.6.44 | simple_cairo |
 | pixman-1-0.dll | 0.43.4 | simple_cairo |
