@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- 2026-11-22: `bin/freetype.dll` is FreeType 2.14.3, copied from simple_cairo 1.8.1 (2.12.1 had
+  CVE-2025-27363). Poppler 24.08.0 imports nothing it lacks: poppler.dll's 17 functions,
+  poppler-glib.dll's 6 and pdftocairo.exe's 6 are all exported. pdftotext reads text and
+  pdftocairo renders a page with the new DLL; suite 14/0.
+
 ### Changed (the cairo set is simple_cairo's)
 - 2026-11-11: the seven DLLs of the cairo set in `bin/` (cairo 1.18.0, fontconfig, freetype,
   expat, libpng, pixman, zlib) are now owned by simple_cairo (`simple_cairo/runtime/windows/`,
