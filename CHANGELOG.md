@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Security
+- 2026-11-25: `bin/libcurl.dll` is curl 8.23.0, the curl project's own Windows build (8.10.1
+  before), with LibreSSL 4.4.1 and libssh2 1.11.1 built in, so `bin/libssh2.dll` 1.11.0 and
+  `bin/libcrypto-3-x64.dll` (OpenSSL 3.3.2) are removed. `bin/liblzma.dll` is xz 5.8.3 (5.2.3
+  before). Removed `bin/libtiff.dll` and `bin/libzstd.dll`, which nothing in `bin/` imports.
+  Licenses in `bin/licenses/curl` and `bin/licenses/xz`. poppler.dll's 6 curl imports and
+  tiff.dll's 6 lzma imports are all exported. pdftotext, pdftocairo and wkhtmltopdf run with only
+  System32 on PATH.
 - 2026-11-23: `bin/libexpat.dll` is Expat 2.9.0 and `bin/libpng16.dll` is libpng 1.6.59, copied
   from simple_cairo 1.8.2 (2.6.3 and 1.6.44 before: 33 and 12 CVEs fixed since). poppler.dll's
   35 libpng imports are all exported. Removed `bin/expat.dll`, a second copy of Expat 2.6.3 that
