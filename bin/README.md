@@ -33,3 +33,27 @@ is a written, temporary exception to that reading:
 
 Proved 2026-11-11: with only System32 and Windows on PATH, `bin/pdftotext.exe` (24.08.0) starts
 and extracts text, loading these copies (none of the seven exists in System32).
+
+## curl and xz: owned here, for Poppler
+
+| DLL | Version | Source | Imported by |
+|---|---|---|---|
+| libcurl.dll | 8.23.0 (build 8.23.0_10) | curl.se official Windows build, `libcurl-x64.dll` renamed | poppler.dll (6 functions: curl_easy_init, _setopt, _perform, _getinfo, _reset, _cleanup) |
+| liblzma.dll | 5.8.3 | conda-forge `liblzma-5.8.3-hfd05255_1` | tiff.dll (6 lzma_ functions) |
+
+- **Why curl.se's build:** it carries its own TLS (LibreSSL 4.4.1), libssh2 1.11.1, libpsl 0.23.3,
+  nghttp2, brotli and zstd inside one DLL that imports only Windows' own. conda-forge's libcurl
+  from 8.21.0 build 2 on needs libpsl, which needs ICU (about 35 MB more). simple_showcase ships the
+  same build as `libcurl-x64.dll`, so the fleet has one curl. Larry's choice, 2026-11-25.
+- **Why renamed:** poppler.dll imports `libcurl.dll` by name; the exports are curl's stable C API.
+- **Provenance:** zip SHA-256 `7157104332c15c80edba0359446584cb317c63f4c3cf5e569b76ecad5aa0e197`,
+  matching the hash curl.se/windows publishes. liblzma package SHA-256
+  `d36c4a1e1f80fd08e18a407e03622ff2f34dfdd022da6488ad19603dea19e6d5`.
+- **Licenses:** `licenses/curl/` (curl and each library built into it), `licenses/xz/`.
+- **Gone since 2026-11-25:** `libssh2.dll` 1.11.0 and `libcrypto-3-x64.dll` (OpenSSL 3.3.2), which
+  only the old libcurl loaded; `libtiff.dll` and `libzstd.dll`, which nothing here imports.
+
+Proved 2026-11-25 with only System32 and Windows on PATH: pdftotext reads text, pdftocairo renders
+a page to PNG, wkhtmltopdf writes a PDF; loading poppler.dll from this folder loads
+`libcurl/8.23.0 LibreSSL/4.4.1 ... libssh2/1.11.1` and `liblzma 5.8.3`, and neither libssh2.dll nor
+libcrypto-3-x64.dll.
