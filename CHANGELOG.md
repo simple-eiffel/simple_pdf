@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Security
+- 2026-11-26: the TIFF stack moved together: `bin/tiff.dll` 4.7.0 to 4.7.2, `bin/zstd.dll` 1.5.6
+  to 1.6.0, `bin/deflate.dll` to libdeflate 1.26, `bin/Lerc.dll` to 4.3.0, `bin/jpeg8.dll` to
+  libjpeg-turbo 3.2.1 (all conda-forge win-64, SHA-256 checked). Every import from poppler.dll
+  and tiff.dll resolves, including the 44 by-ordinal imports of jpeg8.dll. Licenses in
+  `bin/licenses/`.
 - 2026-11-25: `bin/libcurl.dll` is curl 8.23.0, the curl project's own Windows build (8.10.1
   before), with LibreSSL 4.4.1 and libssh2 1.11.1 built in, so `bin/libssh2.dll` 1.11.0 and
   `bin/libcrypto-3-x64.dll` (OpenSSL 3.3.2) are removed. `bin/liblzma.dll` is xz 5.8.3 (5.2.3

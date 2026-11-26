@@ -57,3 +57,25 @@ Proved 2026-11-25 with only System32 and Windows on PATH: pdftotext reads text, 
 a page to PNG, wkhtmltopdf writes a PDF; loading poppler.dll from this folder loads
 `libcurl/8.23.0 LibreSSL/4.4.1 ... libssh2/1.11.1` and `liblzma 5.8.3`, and neither libssh2.dll nor
 libcrypto-3-x64.dll.
+
+## The TIFF stack: owned here, for Poppler
+
+| DLL | Version | conda-forge package (win-64) | Imported by |
+|---|---|---|---|
+| tiff.dll | 4.7.2 | `libtiff-4.7.2-hddd6eee_3` | poppler.dll (5 functions) |
+| zstd.dll | 1.6.0 | `zstd-1.6.0-h49982e4_0` | tiff.dll (15) |
+| deflate.dll | 1.26 | `libdeflate-1.26-h1a1d4e4_0` | tiff.dll (7) |
+| Lerc.dll | 4.3.0 | `lerc-4.3.0-hd936e49_0` | tiff.dll (3) |
+| jpeg8.dll | libjpeg-turbo 3.2.1 | `libjpeg-turbo-3.2.1-hfd05255_0` | poppler.dll (19 by ordinal), tiff.dll (25 by ordinal) |
+
+- **Why together:** libtiff 4.7.2 build 3 (2026-11-25) is the first conda-forge build on zstd 1.6,
+  so the whole stack moved in one step. Each package's SHA-256 matched the one conda-forge's API
+  publishes for it.
+- **Ordinals:** poppler.dll and tiff.dll import jpeg8.dll by ordinal number, not by name. The 135
+  exports of 3.2.1 keep every ordinal of 3.0.0, checked one by one before the swap. Check again
+  whenever jpeg8.dll changes.
+- **zlib:** these import zlib.dll by name only; it stays the cairo set's copy (see above).
+- **Licenses:** `licenses/libtiff/`, `licenses/zstd/`, `licenses/libdeflate/`, `licenses/lerc/`,
+  `licenses/libjpeg-turbo/`.
+- **Mirrors:** simple_graphviz and simple_spec_viz carry byte-identical copies of tiff.dll and
+  everything it imports (libgd.dll there imports tiff). Change them here first, then copy.
